@@ -30,9 +30,6 @@ export const Navbar = () => {
     setActiveMealCategory(category);
   };
 
-  const handleIngredientHover = (ingredientType) => {
-    setActiveIngredient(ingredientType);
-  };
 
   return (
     <div>
@@ -318,179 +315,6 @@ export const Navbar = () => {
                 )}
               </div>
 
-              {/* Ingredients Dropdown */}
-              <div className="relative">
-                <button
-                  onClick={toggleDropdown(setIsIngredientsOpen)}
-                  onMouseEnter={() => handleIngredientHover("ingredients")}
-                  onMouseLeave={() => handleIngredientHover(null)}
-                  className="flex items-center space-x-2 px-4 py-2 rounded hover:bg-gray-200"
-                >
-                  <span>Ingredients</span>
-                  <FaChevronDown />
-                </button>
-                {(isIngredientsOpen || activeIngredient) && (
-                  <div className="absolute mt-2 left-0 bg-white text-black rounded shadow-lg w-64">
-                    {/* Vegetables Dropdown */}
-                    <div
-                      className="px-4 py-2 hover:bg-gray-100 cursor-pointer relative"
-                      onMouseEnter={() => handleIngredientHover("vegetables")}
-                      onMouseLeave={() => handleIngredientHover(null)}
-                    >
-                      Vegetables
-                      {activeIngredient === "vegetables" && (
-                        <div className="absolute left-full top-0 bg-white text-black rounded shadow-lg w-48">
-                          <Link
-                            to="/recipes/salad"
-                            className="block px-4 py-2 hover:bg-gray-100"
-                          >
-                            Salad
-                          </Link>
-                          <Link
-                            to="/recipes/broccoli"
-                            className="block px-4 py-2 hover:bg-gray-100"
-                          >
-                            Broccoli
-                          </Link>
-                          <Link
-                            to="/recipes/cabbage"
-                            className="block px-4 py-2 hover:bg-gray-100"
-                          >
-                            Cabbage
-                          </Link>
-                          <Link
-                            to="/recipes/pumpkin"
-                            className="block px-4 py-2 hover:bg-gray-100"
-                          >
-                            Pumpkin
-                          </Link>
-                        </div>
-                      )}
-                    </div>
-                    {/* Meat Dropdown */}
-                    <div
-                      className="px-4 py-2 hover:bg-gray-100 cursor-pointer relative"
-                      onMouseEnter={() => handleIngredientHover("meat")}
-                      onMouseLeave={() => handleIngredientHover(null)}
-                    >
-                      Meat
-                      {activeIngredient === "meat" && (
-                        <div className="absolute left-full top-0 bg-white text-black rounded shadow-lg w-48">
-                          <Link
-                            to="/recipes/chicken"
-                            className="block px-4 py-2 hover:bg-gray-100"
-                          >
-                            Chicken
-                          </Link>
-                          <Link
-                            to="/recipes/beef"
-                            className="block px-4 py-2 hover:bg-gray-100"
-                          >
-                            Beef
-                          </Link>
-                          <Link
-                            to="/recipes/fish"
-                            className="block px-4 py-2 hover:bg-gray-100"
-                          >
-                            Fish
-                          </Link>
-                        </div>
-                      )}
-                    </div>
-                    {/* Noodles Dropdown */}
-                    <div
-                      className="px-4 py-2 hover:bg-gray-100 cursor-pointer relative"
-                      onMouseEnter={() => handleIngredientHover("noodles")}
-                      onMouseLeave={() => handleIngredientHover(null)}
-                    >
-                      Noodles
-                      {activeIngredient === "noodles" && (
-                        <div className="absolute left-full top-0 bg-white text-black rounded shadow-lg w-48">
-                          <Link
-                            to="/recipes/pasta"
-                            className="block px-4 py-2 hover:bg-gray-100"
-                          >
-                            Pasta
-                          </Link>
-                          <Link
-                            to="/recipes/beef-noodles"
-                            className="block px-4 py-2 hover:bg-gray-100"
-                          >
-                            Beef Noodles
-                          </Link>
-                          <Link
-                            to="/recipes/fish-noodles"
-                            className="block px-4 py-2 hover:bg-gray-100"
-                          >
-                            Fish Noodles
-                          </Link>
-                        </div>
-                      )}
-                    </div>
-                    {/* Fruit Dropdown */}
-                    <div
-                      className="px-4 py-2 hover:bg-gray-100 cursor-pointer relative"
-                      onMouseEnter={() => handleIngredientHover("fruit")}
-                      onMouseLeave={() => handleIngredientHover(null)}
-                    >
-                      Fruit
-                      {activeIngredient === "fruit" && (
-                        <div className="absolute left-full top-0 bg-white text-black rounded shadow-lg w-48">
-                          <Link
-                            to="/recipes/banana"
-                            className="block px-4 py-2 hover:bg-gray-100"
-                          >
-                            Banana
-                          </Link>
-                          <Link
-                            to="/recipes/strawberry"
-                            className="block px-4 py-2 hover:bg-gray-100"
-                          >
-                            Strawberry
-                          </Link>
-                          <Link
-                            to="/recipes/apple"
-                            className="block px-4 py-2 hover:bg-gray-100"
-                          >
-                            Apple
-                          </Link>
-                        </div>
-                      )}
-                    </div>
-                    {/* Dairy & Egg Dropdown */}
-                    <div
-                      className="px-4 py-2 hover:bg-gray-100 cursor-pointer relative"
-                      onMouseEnter={() => handleIngredientHover("dairyEgg")}
-                      onMouseLeave={() => handleIngredientHover(null)}
-                    >
-                      Dairy & Egg
-                      {activeIngredient === "dairyEgg" && (
-                        <div className="absolute left-full top-0 bg-white text-black rounded shadow-lg w-48">
-                          <Link
-                            to="/recipes/butter"
-                            className="block px-4 py-2 hover:bg-gray-100"
-                          >
-                            Butter
-                          </Link>
-                          <Link
-                            to="/recipes/cheese"
-                            className="block px-4 py-2 hover:bg-gray-100"
-                          >
-                            Cheese
-                          </Link>
-                          <Link
-                            to="/recipes/egg"
-                            className="block px-4 py-2 hover:bg-gray-100"
-                          >
-                            Egg
-                          </Link>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
-              </div>
-
               {/* User Profile and Logout */}
               <div className="flex-shrink-0 flex items-center space-x-4">
                 {!cookies.access_token ? (
@@ -514,7 +338,7 @@ export const Navbar = () => {
                   className="flex items-center space-x-2 px-4 py-2 rounded hover:bg-gray-200"
                 >
                   <FaBookmark />
-                  <span>Bookmarks</span>
+                  <span>SavedRecipes</span>
                 </Link>
 
                 <Link
