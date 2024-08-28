@@ -35,7 +35,7 @@ const recipeSchema = mongoose.Schema(
     },
     category: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Category", // Reference to the Category model
+      ref: "Category", 
       required: true,
     },
   },
