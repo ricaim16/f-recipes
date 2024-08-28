@@ -317,21 +317,7 @@ export const Navbar = () => {
 
               {/* User Profile and Logout */}
               <div className="flex-shrink-0 flex items-center space-x-4">
-                {!cookies.access_token ? (
-                  <Link
-                    to="/auth"
-                    className="bg-black text-white py-2 px-4 rounded hover:bg-gray-800"
-                  >
-                    Login/Register
-                  </Link>
-                ) : (
-                  <button
-                    onClick={logout}
-                    className="bg-black text-white py-2 px-4 rounded hover:bg-gray-800"
-                  >
-                    Logout
-                  </button>
-                )}
+               
 
                 <Link
                   to="/saved-recipes"
@@ -347,6 +333,22 @@ export const Navbar = () => {
                 >
                   + ADD RECIPES
                 </Link>
+
+                {!cookies.access_token ? (
+                  <Link
+                    to="/auth"
+                    className="bg-black text-white py-2 px-4 rounded hover:bg-gray-800"
+                  >
+                    Login/Register
+                  </Link>
+                ) : (
+                  <button
+                    onClick={logout}
+                    className="bg-black text-white py-2 px-4 rounded hover:bg-gray-800"
+                  >
+                    Logout
+                  </button>
+                )}
               </div>
             </div>
           </div>
