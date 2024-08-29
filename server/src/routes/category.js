@@ -17,9 +17,15 @@ router.get("/getcategories", async (req, res) => {
 // ADD CATEGORY
 router.post("/addcategory", async (req, res) => {
   const { name } = req.body;
-  if (!name) {
-    return res.status(400).json({ message: "Category name is required" });
+
+  // Check for existing category
+  const existingCategory = await CategoryModel.findOne({ name });
+  if (existingCategory) {
+    return res
+      .status(400)
+      .json({ message: `Category with name "${name}" already exists` });
   }
+
   try {
     const newCategory = new CategoryModel({ name });
     await newCategory.save();

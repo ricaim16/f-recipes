@@ -26,34 +26,32 @@ router.post("/", verifyToken, async (req, res) => {
     imageUrl,
     cookingTime,
     userOwner,
+    category,
   } = req.body;
 
-  const recipe = new RecipesModel({
-    _id: new mongoose.Types.ObjectId(),
-    name,
-    description,
-    ingredients,
-    instructions,
-    imageUrl,
-    cookingTime,
-    userOwner,
-  });
-
   try {
+    if (!name || !description || !ingredients || !instructions || !userOwner) {
+      return res.status(400).json({ error: "Missing required fields" });
+    }
+
+    const recipe = new RecipesModel({
+      _id: new mongoose.Types.ObjectId(),
+      name,
+      description,
+      ingredients,
+      instructions,
+      imageUrl,
+      cookingTime,
+      userOwner,
+      category,
+    });
+
     const result = await recipe.save();
     res.status(201).json({
-      createdRecipe: {
-        name: result.name,
-        description: result.description,
-        ingredients: result.ingredients,
-        instructions: result.instructions,
-        imageUrl: result.imageUrl,
-        cookingTime: result.cookingTime,
-        _id: result._id,
-        createdAt: result.createdAt, // Include createdAt timestamp
-      },
+      createdRecipe: result,
     });
   } catch (err) {
+    console.error("Error creating recipe:", err);
     res.status(500).json({ error: err.message });
   }
 });
@@ -61,7 +59,9 @@ router.post("/", verifyToken, async (req, res) => {
 // Get a recipe by ID
 router.get("/:recipeId", async (req, res) => {
   try {
-    const result = await RecipesModel.findById(req.params.recipeId);
+    const result = await RecipesModel.findById(req.params.recipeId).populate(
+      "category"
+    );
     if (result) {
       res.status(200).json(result);
     } else {
@@ -74,14 +74,21 @@ router.get("/:recipeId", async (req, res) => {
 
 // Save a Recipe
 router.put("/", async (req, res) => {
-  const recipe = await RecipesModel.findById(req.body.recipeID);
-  const user = await UserModel.findById(req.body.userID);
+  const { recipeID, userID } = req.body;
+
   try {
-    user.savedRecipes.push(recipe);
+    const recipe = await RecipesModel.findById(recipeID);
+    const user = await UserModel.findById(userID);
+
+    if (!recipe || !user) {
+      return res.status(404).json({ message: "User or recipe not found" });
+    }
+
+    user.savedRecipes.push(recipeID);
     await user.save();
     res.status(201).json({ savedRecipes: user.savedRecipes });
   } catch (err) {
-    res.status(500).json(err);
+    res.status(500).json({ error: err.message });
   }
 });
 
@@ -89,9 +96,13 @@ router.put("/", async (req, res) => {
 router.get("/savedRecipes/ids/:userID", async (req, res) => {
   try {
     const user = await UserModel.findById(req.params.userID);
-    res.json({ savedRecipes: user?.savedRecipes });
+    if (user) {
+      res.status(200).json({ savedRecipes: user.savedRecipes });
+    } else {
+      res.status(404).json({ message: "User not found" });
+    }
   } catch (err) {
-    res.json(err);
+    res.status(500).json({ error: err.message });
   }
 });
 
@@ -99,12 +110,16 @@ router.get("/savedRecipes/ids/:userID", async (req, res) => {
 router.get("/savedRecipes/:userID", async (req, res) => {
   try {
     const user = await UserModel.findById(req.params.userID);
-    const savedRecipes = await RecipesModel.find({
-      _id: { $in: user.savedRecipes },
-    });
-    res.json({ savedRecipes });
+    if (user) {
+      const savedRecipes = await RecipesModel.find({
+        _id: { $in: user.savedRecipes },
+      }).populate("category");
+      res.status(200).json({ savedRecipes });
+    } else {
+      res.status(404).json({ message: "User not found" });
+    }
   } catch (err) {
-    res.json(err);
+    res.status(500).json({ error: err.message });
   }
 });
 
