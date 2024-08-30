@@ -2,7 +2,7 @@ import express from "express";
 import cors from "cors";
 import mongoose from "mongoose";
 import { userRouter } from "./routes/users.js";
-import { recipesRouter } from "./routes/recipes.js"; 
+import { recipesRouter } from "./routes/recipes.js";
 import { categoryRouter } from "./routes/category.js"; // Import the router
 
 const app = express();
@@ -24,11 +24,11 @@ mongoose
 app.use(cors());
 app.use(express.json());
 
-// Use the userRouter for routes starting with /auth
 
 app.use("/auth", userRouter);
 app.use("/recipes", recipesRouter);
 app.use("/category", categoryRouter);
+
 // Start the server
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);

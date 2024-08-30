@@ -1,6 +1,5 @@
 import mongoose from "mongoose";
 
-// Define the recipe schema
 const recipeSchema = mongoose.Schema(
   {
     name: {
@@ -34,7 +33,7 @@ const recipeSchema = mongoose.Schema(
       ref: "Users",
       required: true,
     },
-    category: { type: mongoose.Schema.Types.ObjectId, ref: "CategoryModel" },
+    categories: [{ type: String }], // Changed from ObjectId to String
   },
   { timestamps: true }
 );

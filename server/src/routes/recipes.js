@@ -3,15 +3,25 @@ import mongoose from "mongoose";
 import { RecipesModel } from "../models/Recipes.js";
 import { UserModel } from "../models/Users.js";
 import { verifyToken } from "./users.js";
+import { CategoryModel } from "../models/Category.js";
 
 const router = express.Router();
+
 
 // Get all recipes, sorted by creation date (newest first)
 router.get("/", async (req, res) => {
   try {
-    const result = await RecipesModel.find({}).sort({ createdAt: -1 });
+    const { category } = req.query; // Get category from query parameters
+
+    let query = {};
+    if (category) {
+      query = { categories: category };
+    }
+
+    const result = await RecipesModel.find(query).sort({ createdAt: -1 });
     res.status(200).json(result);
   } catch (err) {
+    console.error("Error fetching recipes:", err);
     res.status(500).json({ error: err.message });
   }
 });
@@ -25,17 +35,12 @@ router.post("/", verifyToken, async (req, res) => {
     instructions,
     imageUrl,
     cookingTime,
+    categories,
     userOwner,
-    category,
   } = req.body;
 
   try {
-    if (!name || !description || !ingredients || !instructions || !userOwner) {
-      return res.status(400).json({ error: "Missing required fields" });
-    }
-
-    const recipe = new RecipesModel({
-      _id: new mongoose.Types.ObjectId(),
+    const newRecipe = new RecipesModel({
       name,
       description,
       ingredients,
@@ -43,16 +48,25 @@ router.post("/", verifyToken, async (req, res) => {
       imageUrl,
       cookingTime,
       userOwner,
-      category,
+      categories,
     });
 
-    const result = await recipe.save();
-    res.status(201).json({
-      createdRecipe: result,
-    });
-  } catch (err) {
-    console.error("Error creating recipe:", err);
-    res.status(500).json({ error: err.message });
+    await newRecipe.save();
+
+    for (const category of categories) {
+      const existingCategory = await CategoryModel.findOne({ name: category });
+      if (!existingCategory) {
+        const newCategory = new CategoryModel({ name: category });
+        await newCategory.save();
+      }
+    }
+
+    res.status(201).json(newRecipe);
+  } catch (error) {
+    console.error("Error creating recipe:", error);
+    res
+      .status(500)
+      .json({ message: "Internal Server Error", error: error.message });
   }
 });
 
@@ -68,6 +82,7 @@ router.get("/:recipeId", async (req, res) => {
       res.status(404).json({ message: "Recipe not found" });
     }
   } catch (err) {
+    console.error("Error fetching recipe:", err);
     res.status(500).json({ error: err.message });
   }
 });
@@ -88,6 +103,7 @@ router.put("/", async (req, res) => {
     await user.save();
     res.status(201).json({ savedRecipes: user.savedRecipes });
   } catch (err) {
+    console.error("Error saving recipe:", err);
     res.status(500).json({ error: err.message });
   }
 });
@@ -102,6 +118,7 @@ router.get("/savedRecipes/ids/:userID", async (req, res) => {
       res.status(404).json({ message: "User not found" });
     }
   } catch (err) {
+    console.error("Error fetching saved recipe IDs:", err);
     res.status(500).json({ error: err.message });
   }
 });
@@ -113,12 +130,29 @@ router.get("/savedRecipes/:userID", async (req, res) => {
     if (user) {
       const savedRecipes = await RecipesModel.find({
         _id: { $in: user.savedRecipes },
-      }).populate("category");
+      });
       res.status(200).json({ savedRecipes });
     } else {
       res.status(404).json({ message: "User not found" });
     }
   } catch (err) {
+    console.error("Error fetching saved recipes:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Get recipes by category
+router.get("/category/:categoryName", async (req, res) => {
+  try {
+    const { categoryName } = req.params;
+    console.log("Category name:", categoryName); // Debugging
+    const recipes = await RecipesModel.find({
+      categories: { $in: [categoryName] },
+    });
+    console.log("Recipes found:", recipes); // Debugging
+    res.status(200).json(recipes);
+  } catch (err) {
+    console.error("Error fetching recipes by category:", err);
     res.status(500).json({ error: err.message });
   }
 });

@@ -1,11 +1,8 @@
-
-
-
-// AuthForm.jsx
 import React, { useState } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { useCookies } from "react-cookie";
 
 export const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -15,11 +12,11 @@ export const Auth = () => {
   const [showPassword, setShowPassword] = useState(false); // New state for password visibility
   const [error, setError] = useState(""); // State for error messages
   const [successMessage, setSuccessMessage] = useState(""); // State for success messages
+  const [cookies, setCookie] = useCookies(["access_token"]);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     try {
       if (isLogin) {
         // Login request
@@ -29,7 +26,7 @@ export const Auth = () => {
         });
 
         // Set cookies and localStorage
-        document.cookie = `access_token=${result.data.token}; path=/`;
+        setCookie("access_token", result.data.token, { path: "/" });
         window.localStorage.setItem("userID", result.data.userID);
         navigate("/");
       } else {
@@ -44,6 +41,8 @@ export const Auth = () => {
         setEmail("");
         setPassword("");
         setName("");
+        // Optionally, redirect to login page
+        setTimeout(() => setIsLogin(true), 2000); // Redirect to login after 2 seconds
       }
     } catch (error) {
       setError("An error occurred. Please try again.");
@@ -56,7 +55,7 @@ export const Auth = () => {
       {/* Description Section */}
       <div
         className="hidden lg:flex lg:flex-1 lg:items-center lg:justify-center bg-gray-800 text-white p-4 md:p-6 lg:p-12"
-        style={{ height: "100vh" }} // Adjusted height
+        style={{ height: "100vh" }}
       >
         <div className="max-w-xs md:max-w-sm lg:max-w-md text-center">
           <h2 className="text-lg md:text-xl lg:text-3xl font-bold mb-4">

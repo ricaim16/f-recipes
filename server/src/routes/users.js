@@ -3,6 +3,13 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import nodemailer from "nodemailer";
 import { UserModel } from "../models/Users.js";
+import multer from "multer";
+import path from "path";
+import fs from "fs";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const router = express.Router();
 const JWT_SECRET = "Aimee"; // Hardcoded JWT secret
@@ -21,7 +28,7 @@ function sendMail(email) {
   const mailDetails = {
     from: {
       name: "emu",
-      address: "no-reply@emuats0.com", // Fixed the email address format
+      address: "no-reply@emuats0.com",
     },
     to: email,
     subject: "Welcome to the food recipes application",
@@ -36,6 +43,56 @@ function sendMail(email) {
     }
   });
 }
+
+// Define storage
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const dir = path.join(__dirname, "../profilePicture");
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+    cb(null, dir);
+  },
+  filename: (req, file, cb) => {
+    const userId = req.params.id;
+    const ext = path.extname(file.originalname);
+    cb(null, `${userId}${ext}`);
+  },
+});
+
+// Set file filter
+const fileFilter = (req, file, cb) => {
+  if (file.mimetype.startsWith("image")) {
+    cb(null, true);
+  } else {
+    cb(new Error("Only image files are allowed"), false);
+  }
+};
+
+// Set up multer
+const upload = multer({
+  storage: storage,
+  fileFilter: fileFilter,
+});
+
+// Get user profile
+router.get("/getuser/:id", async (req, res) => {
+  console.log("Request received for ID:", req.params.id);
+
+  try {
+    const user = await UserModel.findById(req.params.id);
+    if (user) {
+      console.log("User found:", user);
+      res.status(200).json(user);
+    } else {
+      console.log("User not found");
+      res.status(404).json({ message: "User not found" });
+    }
+  } catch (err) {
+    console.error("Error fetching user:", err);
+    res.status(500).json({ message: err.message });
+  }
+});
 
 // Register a new user
 router.post("/register", async (req, res) => {
@@ -118,18 +175,24 @@ export { router as userRouter };
 // Middleware to verify the token
 export const verifyToken = (req, res, next) => {
   const authHeader = req.headers.authorization;
-  if (authHeader) {
-    const token = authHeader.split(" ")[1]; // Get the token part from "Bearer <token>"
+  console.log("Authorization Header:", authHeader);
+
+  if (authHeader && authHeader.startsWith("Bearer ")) {
+    const token = authHeader.split(" ")[1];
+    console.log("Extracted Token:", token);
 
     jwt.verify(token, JWT_SECRET, (err, user) => {
       if (err) {
+        console.error("Token Verification Error:", err);
         return res.status(403).json({ message: "Token is not valid" });
       }
 
-      req.user = user; // Attach user info to request object
+      req.user = user;
       next();
     });
   } else {
-    res.status(401).json({ message: "No token provided" });
+    res
+      .status(401)
+      .json({ message: "No token provided or incorrect token format" });
   }
 };

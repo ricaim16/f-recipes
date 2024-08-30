@@ -1,21 +1,26 @@
 import express from "express";
-import mongoose from "mongoose";
 import { CategoryModel } from "../models/Category.js"; // Ensure this path is correct
+import { verifyToken } from "./users.js"; // Adjust path as necessary
 
 const router = express.Router();
 
 // GET ALL CATEGORIES
-router.get("/getcategories", async (req, res) => {
+router.get("/getcategories", verifyToken, async (req, res) => {
+  console.log("Received request for /getcategories");
   try {
     const categories = await CategoryModel.find();
+    console.log("Categories fetched:", categories);
     res.status(200).json(categories);
   } catch (error) {
+    console.error("Error fetching categories:", error);
     res.status(500).json({ message: error.message });
   }
 });
 
+
+
 // ADD CATEGORY
-router.post("/addcategory", async (req, res) => {
+router.post("/addcategory", verifyToken, async (req, res) => {
   const { name } = req.body;
 
   // Check for existing category
