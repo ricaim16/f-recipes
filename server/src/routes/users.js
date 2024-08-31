@@ -2,11 +2,12 @@ import express from "express";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import nodemailer from "nodemailer";
-import { UserModel } from "../models/Users.js";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
 import { fileURLToPath } from "url";
+import { UserModel } from "../models/Users.js";
+import mongoose from "mongoose";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -19,7 +20,7 @@ const mailTransporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
     user: "emuats0@gmail.com",
-    pass: "ovbgycwhnzcqojgm",
+    pass: "your_password_here",
   },
 });
 
@@ -44,7 +45,7 @@ function sendMail(email) {
   });
 }
 
-// Define storage
+// Define storage for multer
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     const dir = path.join(__dirname, "../profilePicture");
@@ -60,7 +61,7 @@ const storage = multer.diskStorage({
   },
 });
 
-// Set file filter
+// Set file filter for multer
 const fileFilter = (req, file, cb) => {
   if (file.mimetype.startsWith("image")) {
     cb(null, true);
@@ -73,26 +74,33 @@ const fileFilter = (req, file, cb) => {
 const upload = multer({
   storage: storage,
   fileFilter: fileFilter,
+  limits: { fileSize: 2 * 1024 * 1024 },
 });
 
-// Get user profile
-router.get("/getuser/:id", async (req, res) => {
-  console.log("Request received for ID:", req.params.id);
+// Middleware to verify the token
+export const verifyToken = (req, res, next) => {
+  const authHeader = req.headers.authorization;
+  console.log("Authorization Header:", authHeader);
 
-  try {
-    const user = await UserModel.findById(req.params.id);
-    if (user) {
-      console.log("User found:", user);
-      res.status(200).json(user);
-    } else {
-      console.log("User not found");
-      res.status(404).json({ message: "User not found" });
-    }
-  } catch (err) {
-    console.error("Error fetching user:", err);
-    res.status(500).json({ message: err.message });
+  if (authHeader && authHeader.startsWith("Bearer ")) {
+    const token = authHeader.split(" ")[1];
+    console.log("Extracted Token:", token);
+
+    jwt.verify(token, JWT_SECRET, (err, user) => {
+      if (err) {
+        console.error("Token Verification Error:", err);
+        return res.status(403).json({ message: "Token is not valid" });
+      }
+
+      req.user = user;
+      next();
+    });
+  } else {
+    res
+      .status(401)
+      .json({ message: "No token provided or incorrect token format" });
   }
-});
+};
 
 // Register a new user
 router.post("/register", async (req, res) => {
@@ -130,7 +138,7 @@ router.post("/register", async (req, res) => {
 });
 
 // Get all users (for testing purposes, consider securing this endpoint)
-router.get("/register", async (req, res) => {
+router.get("/users", async (req, res) => {
   try {
     const users = await UserModel.find();
     res.json(users);
@@ -145,7 +153,6 @@ router.post("/login", async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    // Find the user by email
     const user = await UserModel.findOne({ email });
     if (!user) {
       return res
@@ -153,7 +160,6 @@ router.post("/login", async (req, res) => {
         .json({ message: "Email or password is incorrect" });
     }
 
-    // Compare the password
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
       return res
@@ -161,38 +167,67 @@ router.post("/login", async (req, res) => {
         .json({ message: "Email or password is incorrect" });
     }
 
-    // Generate a token
     const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: "30d" });
-    res.json({ token, userID: user._id });
+    res.json({
+      token,
+      userID: user._id,
+      name: user.name,
+      profileImage: user.profileImage,
+    }); // Include the user's name and profile image
   } catch (error) {
     console.error("Login error:", error);
     res.status(500).json({ error: "Server error" });
   }
 });
 
-export { router as userRouter };
+router.get("/getuser/:id", async (req, res) => {
+  const userId = req.params.id.trim();
+  console.log("Received ID:", userId); // Log the ID for debugging
 
-// Middleware to verify the token
-export const verifyToken = (req, res, next) => {
-  const authHeader = req.headers.authorization;
-  console.log("Authorization Header:", authHeader);
-
-  if (authHeader && authHeader.startsWith("Bearer ")) {
-    const token = authHeader.split(" ")[1];
-    console.log("Extracted Token:", token);
-
-    jwt.verify(token, JWT_SECRET, (err, user) => {
-      if (err) {
-        console.error("Token Verification Error:", err);
-        return res.status(403).json({ message: "Token is not valid" });
-      }
-
-      req.user = user;
-      next();
-    });
-  } else {
-    res
-      .status(401)
-      .json({ message: "No token provided or incorrect token format" });
+  if (!mongoose.Types.ObjectId.isValid(userId)) {
+    console.log("Invalid ObjectId format:", userId);
+    return res.status(400).json({ message: "Invalid user ID" });
   }
-};
+
+  try {
+    const user = await UserModel.findById(userId);
+    if (user) {
+      res.status(200).json({
+        name: user.name,
+        email: user.email,
+        bio: user.bio,
+        profileImage: user.profileImage,
+      });
+    } else {
+      console.log("User not found with ID:", userId);
+      res.status(404).json({ message: "User not found" });
+    }
+  } catch (err) {
+    console.error("Error fetching user:", err);
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// Update profile image
+router.post("/upload/:id", upload.single("profileImage"), async (req, res) => {
+  try {
+    const { id } = req.params;
+    const file = req.file;
+    if (!file) {
+      return res.status(400).json({ message: "No file uploaded" });
+    }
+    const filePath = `/profilePicture/${file.filename}`;
+
+    // Update the user's profile image path
+    await UserModel.findByIdAndUpdate(id, { profileImage: filePath });
+
+    res
+      .status(200)
+      .json({ message: "Profile image updated", profileImage: filePath });
+  } catch (err) {
+    console.error("Error updating profile image:", err);
+    res.status(500).json({ message: "Error updating profile image" });
+  }
+});
+
+export { router as userRouter };
