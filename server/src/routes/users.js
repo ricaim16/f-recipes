@@ -13,14 +13,14 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const router = express.Router();
-const JWT_SECRET = "Aimee"; // Hardcoded JWT secret
+const JWT_SECRET = "Aimee"; // Hardcoded JWT secret, avoid in production
 
 // Configure nodemailer
 const mailTransporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
-    user: "emuats0@gmail.com",
-    pass: "your_password_here",
+    user: "emuats0@gmail.com", // Replace with your email
+    pass: "your_password_here", // Replace with your email password
   },
 });
 
@@ -107,27 +107,22 @@ router.post("/register", async (req, res) => {
   const { name, email, password } = req.body;
 
   try {
-    // Check if the email already exists
     const existingUser = await UserModel.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ message: "Email already exists" });
     }
 
-    // Validate password
     if (!password || password.length < 6) {
       return res
         .status(400)
         .json({ message: "Password must be at least 6 characters long" });
     }
 
-    // Hash the password
     const hashedPassword = await bcrypt.hash(password, 10);
     const newUser = new UserModel({ name, email, password: hashedPassword });
 
-    // Save the new user
     await newUser.save();
 
-    // Send welcome email
     sendMail(email);
 
     res.status(201).json({ message: "User registered successfully" });
@@ -173,7 +168,7 @@ router.post("/login", async (req, res) => {
       userID: user._id,
       name: user.name,
       profileImage: user.profileImage,
-    }); // Include the user's name and profile image
+    });
   } catch (error) {
     console.error("Login error:", error);
     res.status(500).json({ error: "Server error" });
@@ -182,7 +177,7 @@ router.post("/login", async (req, res) => {
 
 router.get("/getuser/:id", async (req, res) => {
   const userId = req.params.id.trim();
-  console.log("Received ID:", userId); // Log the ID for debugging
+  console.log("Received ID:", userId);
 
   if (!mongoose.Types.ObjectId.isValid(userId)) {
     console.log("Invalid ObjectId format:", userId);
@@ -218,7 +213,6 @@ router.post("/upload/:id", upload.single("profileImage"), async (req, res) => {
     }
     const filePath = `/profilePicture/${file.filename}`;
 
-    // Update the user's profile image path
     await UserModel.findByIdAndUpdate(id, { profileImage: filePath });
 
     res
