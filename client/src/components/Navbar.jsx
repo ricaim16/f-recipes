@@ -206,7 +206,7 @@ export const Navbar = () => {
                 </button>
                 {(isMealsOpen || activeMeal) && (
                   <div className="absolute mt-2 left-0 bg-white text-black rounded shadow-lg w-64">
-                    {categories.map((category) => (
+                    {visibleCategories.map((category) => (
                       <div
                         key={category._id}
                         className="relative"
@@ -275,6 +275,14 @@ export const Navbar = () => {
                         )}
                       </div>
                     ))}
+                    {!showAllCategories && categories.length > 4 && (
+                      <button
+                        onClick={handleViewMoreClick}
+                        className="block w-full px-4 py-2 text-left hover:bg-gray-100"
+                      >
+                        View All
+                      </button>
+                    )}
                   </div>
                 )}
               </div>
