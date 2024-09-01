@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from "react";
-import { useGetUserID } from "../hooks/useGetUserID";
 import axios from "axios";
-import { FaSearch } from "react-icons/fa"; // Import the search icon from react-icons
+import { FaSearch, FaBookmark, FaStar } from "react-icons/fa";
+import { Link } from "react-router-dom";
+import { useGetUserID } from "../hooks/useGetUserID"; // Correct path
 
 export const Recipes = () => {
   const [recipes, setRecipes] = useState([]);
   const [savedRecipes, setSavedRecipes] = useState([]);
-  const [error, setError] = useState(null); // Added state for error handling
-  const [searchQuery, setSearchQuery] = useState(""); // State for search query
+  const [error, setError] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const userID = useGetUserID();
 
@@ -17,21 +18,22 @@ export const Recipes = () => {
         const response = await axios.get("http://localhost:3001/recipes");
         setRecipes(response.data);
       } catch (err) {
-        console.log("Error fetching recipes:", err);
-        setError("Failed to fetch recipes."); // Provide user feedback
+        console.error("Error fetching recipes:", err);
+        setError("Failed to fetch recipes.");
       }
     };
 
     const fetchSavedRecipes = async () => {
+      if (!userID) return; // Ensure userID is available before making the request
       try {
         const response = await axios.get(
           `http://localhost:3001/recipes/savedRecipes/ids/${userID}`
         );
         setSavedRecipes(response.data.savedRecipes || []);
       } catch (err) {
-        console.log("Error fetching saved recipes:", err);
-        setError("Failed to fetch saved recipes."); // Provide user feedback
-        setSavedRecipes([]); // Ensure it's an array
+        console.error("Error fetching saved recipes:", err);
+        setError("Failed to fetch saved recipes.");
+        setSavedRecipes([]);
       }
     };
 
@@ -40,43 +42,52 @@ export const Recipes = () => {
   }, [userID]);
 
   const saveRecipe = async (recipeID) => {
-    console.log("Saving recipe with ID:", recipeID, "for user:", userID);
+    if (!userID) return; // Ensure userID is available before making the request
     try {
-      const response = await axios.put("http://localhost:3001/recipes", {
+      const response = await axios.put("http://localhost:3001/recipes/save", {
         recipeID,
         userID,
       });
-      console.log("Save response:", response.data);
       setSavedRecipes(response.data.savedRecipes || []);
     } catch (err) {
-      console.log(
+      console.error(
         "Error saving recipe:",
         err.response ? err.response.data : err.message
       );
-      setError("Failed to save recipe."); // Provide user feedback
+      setError("Failed to save recipe.");
     }
   };
 
   const isRecipeSaved = (id) =>
     Array.isArray(savedRecipes) && savedRecipes.includes(id);
 
-  // Handler for search input change
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);
   };
 
-  // Filter recipes based on search query
   const filteredRecipes = recipes.filter((recipe) =>
     recipe.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  const renderStars = (rating) => {
+    if (rating == null || isNaN(rating)) rating = 0;
+    const fullStars = Math.floor(rating);
+    const halfStar = rating % 1 >= 0.5;
+    const stars = [...Array(5)].map((_, index) => {
+      if (index < fullStars)
+        return <FaStar key={index} className="text-yellow-500 text-lg" />;
+      if (index === fullStars && halfStar)
+        return <FaStar key={index} className="text-yellow-500 text-lg" />;
+      return <FaStar key={index} className="text-gray-300 text-lg" />;
+    });
+    return stars;
+  };
 
   return (
     <div className="p-6 mx-auto">
       <h1 className="text-4xl font-bold mb-8 text-center">Recipes</h1>
       {error && <p className="text-red-500 text-center mb-4">{error}</p>}
 
-      {/* Search Input with Icon */}
       <div className="mb-8 relative w-1/2 mx-auto">
         <input
           type="text"
@@ -94,47 +105,55 @@ export const Recipes = () => {
             key={recipe._id}
             className="bg-white shadow-lg rounded-lg overflow-hidden flex flex-col"
           >
-            <div className="p-6 flex-1 flex flex-col">
-              <div className="flex justify-end mb-4">
-                <button
-                  onClick={() => saveRecipe(recipe._id)}
-                  disabled={isRecipeSaved(recipe._id)}
-                  className={`px-4 py-2 rounded text-white ${
-                    isRecipeSaved(recipe._id)
-                      ? "bg-gray-400"
-                      : "bg-blue-500 hover:bg-blue-600"
-                  } transition`}
-                >
-                  {isRecipeSaved(recipe._id) ? "Saved" : "Save"}
-                </button>
+            <div className="flex-1 p-6 flex flex-col">
+              <div className="flex items-center mb-4">
+                <div className="w-16 h-16 rounded-full bg-gray-300 flex items-center justify-center mr-4">
+                  <img
+                    src={recipe.profileImage}
+                    alt="Profile"
+                    className="w-14 h-14 rounded-full object-cover"
+                  />
+                </div>
+                <div className="text-lg font-semibold">{recipe.name}</div>
               </div>
-              <h2 className="text-2xl font-semibold mb-2">{recipe.name}</h2>
-              <p className="text-gray-700 text-base mb-4">
-                {recipe.description}
-              </p>
-
               <img
                 src={recipe.imageUrl}
                 alt={recipe.name}
                 className="w-full h-56 object-cover mb-4"
               />
-              <div className="flex-1">
-                <h3 className="text-xl font-medium mb-3">Ingredients</h3>
-                <ul className="list-disc pl-6 text-gray-700 text-base mb-4">
-                  {recipe.ingredients.map((ingredient, index) => (
-                    <li key={index}>{ingredient}</li>
-                  ))}
-                </ul>
-                <h3 className="text-xl font-medium mb-3">Instructions</h3>
-                <p className="text-gray-700 text-base mb-5">
-                  {recipe.instructions}
+              <p className="text-gray-700 text-base mb-4">
+                {recipe.description}
+              </p>
+              <div className="flex items-center justify-between mb-6">
+                <p className="text-gray-700 text-base">
+                  Cooking Time: {recipe.cookingTime} minutes
                 </p>
-                <div className="flex justify-between items-center mb-6">
-                  <p className="text-gray-700 text-base">
-                    Cooking Time: {recipe.cookingTime} minutes
-                  </p>
-                 
-                </div>
+                <button
+                  onClick={() => saveRecipe(recipe._id)}
+                  className={`p-2 rounded ${
+                    isRecipeSaved(recipe._id)
+                      ? "text-yellow-500"
+                      : "text-gray-500"
+                  } transition`}
+                >
+                  <FaBookmark className="text-xl" />
+                </button>
+              </div>
+              <div className="flex items-center mb-4">
+                {renderStars(recipe.averageRating)}
+                <span className="ml-2 text-gray-600 text-sm">
+                  {recipe.averageRating != null
+                    ? recipe.averageRating.toFixed(1)
+                    : "0.0"}
+                </span>
+              </div>
+              <div className="flex justify-center mb-4">
+                <Link
+                  to={`/recipes/${recipe._id}`}
+                  className="text-blue-500 hover:text-blue-700 underline"
+                >
+                  Review
+                </Link>
               </div>
             </div>
           </div>

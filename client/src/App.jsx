@@ -8,6 +8,7 @@ import { Home } from "./pages/Home";
 import { Ingredients } from "./pages/Ingredients";
 import { SavedRecipes } from "./pages/Saved-recipes";
 import RecipesList from "./pages/RecipesList"; // Corrected import path
+import RecipeDetails from "./pages/RecipesDetails";
 
 function App() {
   return (
@@ -21,6 +22,8 @@ function App() {
           <Route path="/auth" element={<Auth />} />
           <Route path="/saved-recipes" element={<SavedRecipes />} />
           <Route path="/create-recipes" element={<CreateRecipes />} />
+          <Route path="/recipes/:id" element={<RecipeDetails/>} />
+
           <Route
             path="/recipes/category/:categoryName"
             element={<RecipesList />}

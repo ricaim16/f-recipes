@@ -1,32 +1,10 @@
 import express from "express";
 import mongoose from "mongoose";
-import { RecipesModel } from "../models/Recipes.js"; // Ensure this path and model name are correct
-import { ReviewModel } from "../models/Reviews.js"; // Ensure this path and model name are correct
+import { ReviewModel } from "../models/Reviews.js";
+import { RecipesModel } from "../models/Recipes.js";
 
 const router = express.Router();
 
-router.get("/getallreviews/:id", async (req, res) => {
-  const { id } = req.params;
-  console.log("Received ID:", id); // Log ID for debugging
-
-  if (!id) return res.status(400).json({ message: "Recipe id is required" });
-  if (!mongoose.Types.ObjectId.isValid(id))
-    return res.status(400).json({ message: "Invalid recipe id" });
-
-  try {
-    const reviews = await ReviewModel.find({ recipeId: id })
-      .populate("userId", "name email profileImage") // Ensure this matches your Review schema field
-      .exec();
-    console.log("Found Reviews:", reviews); // Log reviews for debugging
-    res.status(200).json(reviews);
-  } catch (error) {
-    console.error("Error fetching reviews:", error); // Log error for debugging
-    res.status(500).json({ message: error.message });
-  }
-});
-
-
-// Add review
 router.post("/addreview", async (req, res) => {
   const { recipeId, comment, rating, userId } = req.body;
 
@@ -35,27 +13,43 @@ router.post("/addreview", async (req, res) => {
   }
 
   try {
-    const existingReview = await ReviewModel.findOne({ recipeId, userId });
-    if (existingReview) {
-      return res
-        .status(400)
-        .json({ message: "You have already reviewed this recipe" });
-    }
-
-    // Create and save the new review
     const newReview = new ReviewModel({ recipeId, comment, rating, userId });
     await newReview.save();
 
-    // Update the recipe document to include the new review ID
+    // Update the recipe's average rating
+    const reviews = await ReviewModel.find({ recipeId })
+      .populate("userId", "name profileImage")
+      .exec();
+    const averageRating =
+      reviews.reduce((acc, review) => acc + review.rating, 0) / reviews.length;
+
     await RecipesModel.findByIdAndUpdate(
       recipeId,
-      { $push: { reviews: newReview._id } }, // Ensure this field matches your Recipe schema
+      { $set: { averageRating } },
       { new: true }
     );
 
-    res.status(201).json(newReview);
+    res.status(201).json(reviews);
   } catch (error) {
     console.error("Error adding review:", error);
+    res.status(500).json({ message: error.message });
+  }
+});
+
+router.get("/getallreviews/:recipeId", async (req, res) => {
+  const { recipeId } = req.params;
+
+  if (!mongoose.Types.ObjectId.isValid(recipeId)) {
+    return res.status(400).json({ message: "Invalid recipe id" });
+  }
+
+  try {
+    const reviews = await ReviewModel.find({ recipeId })
+      .populate("userId", "name profileImage")
+      .exec();
+    res.status(200).json(reviews);
+  } catch (error) {
+    console.error("Error fetching reviews:", error);
     res.status(500).json({ message: error.message });
   }
 });

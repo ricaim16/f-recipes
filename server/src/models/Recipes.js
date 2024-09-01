@@ -34,11 +34,14 @@ const recipeSchema = mongoose.Schema(
       required: true,
     },
     categories: [{ type: String }], // Changed from ObjectId to String
-    reviwe: [
+
+    review: [
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Review",
       },
+    
+    
     ],
   },
   { timestamps: true }
