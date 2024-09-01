@@ -11,6 +11,7 @@ const UserSchema = new mongoose.Schema({
 });
 
 // Create a User model from the schema
-const UserModel = mongoose.model("User", UserSchema); // "User" should match the model name
+const UserModel = mongoose.model("Users", UserSchema); // "User" should match the model name
 
 export { UserModel };
+
