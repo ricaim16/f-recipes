@@ -8,7 +8,7 @@ const reviewSchema = new mongoose.Schema({
   },
   comment: { type: String, required: true },
   rating: { type: Number, required: true },
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: "Users", required: true },
 });
 
 export const ReviewModel = mongoose.model("Review", reviewSchema);

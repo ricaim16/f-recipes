@@ -1,19 +1,19 @@
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import { useState, useEffect } from "react";
-import { FaClock, FaStar } from "react-icons/fa";
+import { FaStar } from "react-icons/fa";
 import format from "date-fns/format";
-import { useGetUserID } from "../hooks/useGetUserID"; // Ensure the correct path
+import { useUserID } from "../hooks/useUserID"; // Ensure this is correct
 
 const RecipeDetails = () => {
   const { id } = useParams();
-  const { user } = useGetUserID(); // Use the hook to get user information
+  const { user } = useUserID(); // Fetch user information
   const [recipe, setRecipe] = useState(null);
   const [reviews, setReviews] = useState([]);
   const [newReview, setNewReview] = useState({ comment: "", rating: 5 });
   const [errorMessage, setErrorMessage] = useState("");
   const [loading, setLoading] = useState(true);
-  const backendUrl = "http://localhost:3001";
+  const backendUrl = "http://localhost:3001"; // Use environment variable
 
   useEffect(() => {
     const fetchRecipe = async () => {
@@ -46,11 +46,11 @@ const RecipeDetails = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setNewReview({ ...newReview, [name]: value });
+    setNewReview((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleStarClick = (rating) => {
-    setNewReview({ ...newReview, rating });
+    setNewReview((prev) => ({ ...prev, rating }));
   };
 
   const handleSubmitReview = async (e) => {
@@ -93,6 +93,13 @@ const RecipeDetails = () => {
     }
   };
 
+  const formatDate = (dateStr) => {
+    const date = new Date(dateStr);
+    return isNaN(date.getTime())
+      ? "Invalid Date"
+      : format(date, "MMM d, yyyy h:mm a");
+  };
+
   if (loading) {
     return (
       <div className="text-center py-16">
@@ -105,15 +112,13 @@ const RecipeDetails = () => {
     <div className="bg-gray-100 min-h-screen py-12 px-6">
       {recipe ? (
         <div className="max-w-3xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden">
-          {/* Recipe Image */}
           <div className="relative">
             <img
               src={recipe.imageUrl}
-              alt={recipe.name}
+              alt={recipe.title}
               className="w-full h-56 object-cover mb-4"
             />
           </div>
-          {/* Recipe Content */}
           <div className="p-6">
             <h2 className="text-2xl font-semibold mb-2">{recipe.title}</h2>
             <p className="text-gray-700 text-base mb-4">{recipe.description}</p>
@@ -142,7 +147,6 @@ const RecipeDetails = () => {
               </div>
             </div>
 
-            {/* Reviews Section */}
             <div className="mt-12">
               <h2 className="text-2xl font-semibold text-gray-800 mb-6">
                 Reviews
@@ -159,7 +163,7 @@ const RecipeDetails = () => {
                           src={
                             review.userId?.profileImage
                               ? `${backendUrl}${review.userId.profileImage}`
-                              : "default-profile.png"
+                              : "/default-profile.png" // Ensure correct path
                           }
                           alt={review.userId?.name || "Anonymous"}
                           className="w-12 h-12 object-cover rounded-full border border-gray-300"
@@ -185,10 +189,7 @@ const RecipeDetails = () => {
                         </div>
                         <p className="text-gray-700">{review.comment}</p>
                         <span className="text-xs text-gray-500 block mt-2">
-                          {format(
-                            new Date(review.createdAt),
-                            "MMM d, yyyy h:mm a"
-                          )}
+                          {formatDate(review.createdAt)}
                         </span>
                       </div>
                     </div>
@@ -199,8 +200,8 @@ const RecipeDetails = () => {
                   </p>
                 )}
               </div>
-              {/* Add Review Form */}
-              {user && (
+
+              {user ? (
                 <form
                   onSubmit={handleSubmitReview}
                   className="mt-8 bg-white p-6 rounded-lg shadow-md"
@@ -244,15 +245,15 @@ const RecipeDetails = () => {
                     Submit Review
                   </button>
                 </form>
+              ) : (
+                <p className="text-gray-600">Please log in to add a review.</p>
               )}
             </div>
           </div>
         </div>
       ) : (
         <div className="text-center py-16">
-          <p className="text-xl text-gray-700">
-            Failed to load recipe details.
-          </p>
+          <p className="text-xl text-gray-700">{errorMessage}</p>
         </div>
       )}
     </div>
@@ -260,4 +261,3 @@ const RecipeDetails = () => {
 };
 
 export default RecipeDetails;
-

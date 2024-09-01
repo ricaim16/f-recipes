@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { FaSearch, FaBookmark, FaStar } from "react-icons/fa";
 import { Link } from "react-router-dom";
-import { useGetUserID } from "../hooks/useGetUserID"; // Correct path
+import { useGetUserID } from "../hooks/useGetUserID";
 
 export const Recipes = () => {
   const [recipes, setRecipes] = useState([]);
@@ -44,7 +44,7 @@ export const Recipes = () => {
   const saveRecipe = async (recipeID) => {
     if (!userID) return; // Ensure userID is available before making the request
     try {
-      const response = await axios.put("http://localhost:3001/recipes/save", {
+      const response = await axios.put("http://localhost:3001/recipes", {
         recipeID,
         userID,
       });
