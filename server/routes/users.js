@@ -211,8 +211,9 @@ router.post("/upload/:id", upload.single("profileImage"), async (req, res) => {
     if (!file) {
       return res.status(400).json({ message: "No file uploaded" });
     }
-    const filePath = `/profilePicture/${file.filename}`;
-
+    
+    // const filePath = `/profilePicture/${file.filename}`;
+    const filePath = `${file.filename}`;
     await UserModel.findByIdAndUpdate(id, { profileImage: filePath });
 
     res

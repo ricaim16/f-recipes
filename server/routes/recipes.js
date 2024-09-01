@@ -1,6 +1,6 @@
 import express from "express";
 import mongoose from "mongoose";
-import { RecipesModel } from "../models/Recipes.js";
+import { RecipesModel } from "../models/Recipes.js"
 import { UserModel } from "../models/Users.js";
 import { verifyToken } from "./users.js";
 import { CategoryModel } from "../models/Category.js";
