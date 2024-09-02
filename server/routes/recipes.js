@@ -1,10 +1,11 @@
 import express from "express";
 import mongoose from "mongoose";
-import { RecipesModel } from "../models/Recipes.js"
+import { RecipesModel } from "../models/Recipes.js";
 import { UserModel } from "../models/Users.js";
 import { verifyToken } from "./users.js";
 import { CategoryModel } from "../models/Category.js";
-
+import multer from "multer";
+import path from "path";
 const router = express.Router();
 
 // Get all recipes, sorted by creation date (newest first)
@@ -13,27 +14,38 @@ router.get("/", async (req, res) => {
     const { category } = req.query; // Get category from query parameters
 
     const query = category ? { categories: category } : {};
-    const result = await RecipesModel.find(query).sort({ createdAt: -1 });
+    const result = await RecipesModel.find(query).populate('userOwner').sort({ createdAt: -1 });
     res.status(200).json(result);
   } catch (err) {
     console.error("Error fetching recipes:", err);
     res.status(500).json({ error: err.message });
   }
 });
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'recipePic/');
+  },
+  filename: (req, file, cb) => {
+    cb(null, file.filename + '-' + Date.now() + path.extname(file.originalname));
+  }
+});
 
+const upload = multer({ storage: storage });
 // Create a new recipe
-router.post("/", verifyToken, async (req, res) => {
+router.post("/", upload.single('image'), verifyToken, async (req, res) => {
   const {
     name,
     description,
     ingredients,
     instructions,
-    imageUrl,
     cookingTime,
-    categories,
     userOwner,
+    categories,
   } = req.body;
-
+  const imageUrl = req.file ? req.file.path : null
+  if (!imageUrl) {
+    return res.status(400).json({ message: "Image upload failed. Image is required." });
+  }
   try {
     const newRecipe = new RecipesModel({
       name,
@@ -119,7 +131,7 @@ router.get("/savedRecipes/ids/:userID", async (req, res) => {
     const user = await UserModel.findById(req.params.userID);
     res.json({ savedRecipes: user?.savedRecipes });
   } catch (err) {
-    res.json(err );
+    res.json(err);
   }
 });
 
@@ -128,12 +140,12 @@ router.get("/savedRecipes/:userID", async (req, res) => {
   try {
     const user = await UserModel.findById(req.params.userID);
     const savedRecipes = await RecipesModel.find({
-            _id: { $in: user.savedRecipes },
+      _id: { $in: user.savedRecipes },
 
     });
     res.json({ savedRecipes });
 
-    
+
   } catch (err) {
 
     res.json(err);

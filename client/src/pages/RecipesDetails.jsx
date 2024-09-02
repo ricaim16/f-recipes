@@ -114,7 +114,7 @@ const RecipeDetails = () => {
         <div className="max-w-3xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden">
           <div className="relative">
             <img
-              src={recipe.imageUrl}
+              src={`http://localhost:3001/${recipe.imageUrl}`}
               alt={recipe.name}
               className="w-full h-56 object-cover mb-4"
             />
