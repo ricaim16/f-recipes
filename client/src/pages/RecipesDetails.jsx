@@ -115,12 +115,12 @@ const RecipeDetails = () => {
           <div className="relative">
             <img
               src={recipe.imageUrl}
-              alt={recipe.title}
+              alt={recipe.name}
               className="w-full h-56 object-cover mb-4"
             />
           </div>
           <div className="p-6">
-            <h2 className="text-2xl font-semibold mb-2">{recipe.title}</h2>
+            <h2 className="text-2xl font-semibold mb-2">{recipe.name}</h2>
             <p className="text-gray-700 text-base mb-4">{recipe.description}</p>
 
             <div className="flex-1 mb-6">

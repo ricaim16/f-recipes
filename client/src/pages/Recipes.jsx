@@ -16,6 +16,7 @@ export const Recipes = () => {
     const fetchRecipes = async () => {
       try {
         const response = await axios.get("http://localhost:3001/recipes");
+        console.log("Fetched recipes:", response.data); // Log to check averageRating
         setRecipes(response.data);
       } catch (err) {
         console.error("Error fetching recipes:", err);
@@ -24,7 +25,7 @@ export const Recipes = () => {
     };
 
     const fetchSavedRecipes = async () => {
-      if (!userID) return; // Ensure userID is available before making the request
+      if (!userID) return;
       try {
         const response = await axios.get(
           `http://localhost:3001/recipes/savedRecipes/ids/${userID}`
@@ -42,7 +43,7 @@ export const Recipes = () => {
   }, [userID]);
 
   const saveRecipe = async (recipeID) => {
-    if (!userID) return; // Ensure userID is available before making the request
+    if (!userID) return;
     try {
       const response = await axios.put("http://localhost:3001/recipes", {
         recipeID,

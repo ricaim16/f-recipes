@@ -40,9 +40,8 @@ const recipeSchema = mongoose.Schema(
         type: mongoose.Schema.Types.ObjectId,
         ref: "Review",
       },
-    
-    
     ],
+    averageRating: { type: Number, default: 0 },
   },
   { timestamps: true }
 );

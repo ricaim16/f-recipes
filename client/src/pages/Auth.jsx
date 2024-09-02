@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -14,6 +14,13 @@ export const Auth = () => {
   const [successMessage, setSuccessMessage] = useState(""); // State for success messages
   const [cookies, setCookie] = useCookies(["access_token"]);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    // Check if the user is already logged in
+    if (cookies.access_token) {
+      navigate("/"); // Redirect to the home page if already logged in
+    }
+  }, [cookies.access_token, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -42,10 +49,21 @@ export const Auth = () => {
         setPassword("");
         setName("");
         // Optionally, redirect to login page
-        setTimeout(() => setIsLogin(true), 2000); // Redirect to login after 2 seconds
+        setTimeout(() => setIsLogin(true), 1000); // Redirect to login after 2 seconds
       }
     } catch (error) {
-      setError("An error occurred. Please try again.");
+      // Handle different error cases
+      if (error.response) {
+        setError(
+          error.response.data.message || "An error occurred. Please try again."
+        );
+      } else if (error.request) {
+        setError(
+          "No response from the server. Please check your network connection."
+        );
+      } else {
+        setError("An error occurred. Please try again.");
+      }
       console.error(error);
     }
   };

@@ -13,14 +13,14 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const router = express.Router();
-const JWT_SECRET = "Aimee"; // Hardcoded JWT secret, avoid in production
+const JWT_SECRET = "Aimee"; // Use environment variable in production
 
 // Configure nodemailer
 const mailTransporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
     user: "emuats0@gmail.com", // Replace with your email
-    pass: "your_password_here", // Replace with your email password
+    pass: "ovbgycwhnzcqojgm", // Replace with your email password
   },
 });
 
@@ -80,18 +80,12 @@ const upload = multer({
 // Middleware to verify the token
 export const verifyToken = (req, res, next) => {
   const authHeader = req.headers.authorization;
-  console.log("Authorization Header:", authHeader);
-
   if (authHeader && authHeader.startsWith("Bearer ")) {
     const token = authHeader.split(" ")[1];
-    console.log("Extracted Token:", token);
-
     jwt.verify(token, JWT_SECRET, (err, user) => {
       if (err) {
-        console.error("Token Verification Error:", err);
         return res.status(403).json({ message: "Token is not valid" });
       }
-
       req.user = user;
       next();
     });
@@ -122,7 +116,6 @@ router.post("/register", async (req, res) => {
     const newUser = new UserModel({ name, email, password: hashedPassword });
 
     await newUser.save();
-
     sendMail(email);
 
     res.status(201).json({ message: "User registered successfully" });
@@ -143,23 +136,19 @@ router.get("/users", async (req, res) => {
   }
 });
 
-// Log in and generate a token
+// Login a user
 router.post("/login", async (req, res) => {
   const { email, password } = req.body;
 
   try {
     const user = await UserModel.findOne({ email });
     if (!user) {
-      return res
-        .status(400)
-        .json({ message: "Email or password is incorrect" });
+      return res.status(400).json({ message: "User not found" });
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
-      return res
-        .status(400)
-        .json({ message: "Email or password is incorrect" });
+      return res.status(400).json({ message: "Invalid password" });
     }
 
     const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: "30d" });
@@ -171,16 +160,14 @@ router.post("/login", async (req, res) => {
     });
   } catch (error) {
     console.error("Login error:", error);
-    res.status(500).json({ error: "Server error" });
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 
+// Get user by ID
 router.get("/getuser/:id", async (req, res) => {
   const userId = req.params.id.trim();
-  console.log("Received ID:", userId);
-
   if (!mongoose.Types.ObjectId.isValid(userId)) {
-    console.log("Invalid ObjectId format:", userId);
     return res.status(400).json({ message: "Invalid user ID" });
   }
 
@@ -194,7 +181,6 @@ router.get("/getuser/:id", async (req, res) => {
         profileImage: user.profileImage,
       });
     } else {
-      console.log("User not found with ID:", userId);
       res.status(404).json({ message: "User not found" });
     }
   } catch (err) {
@@ -211,8 +197,7 @@ router.post("/upload/:id", upload.single("profileImage"), async (req, res) => {
     if (!file) {
       return res.status(400).json({ message: "No file uploaded" });
     }
-    
-    // const filePath = `/profilePicture/${file.filename}`;
+
     const filePath = `${file.filename}`;
     await UserModel.findByIdAndUpdate(id, { profileImage: filePath });
 

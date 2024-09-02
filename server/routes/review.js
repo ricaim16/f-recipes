@@ -5,6 +5,7 @@ import { RecipesModel } from "../models/Recipes.js";
 
 const router = express.Router();
 
+// Add a review and update the average rating
 router.post("/addreview", async (req, res) => {
   const { recipeId, comment, rating, userId } = req.body;
 
@@ -16,26 +17,26 @@ router.post("/addreview", async (req, res) => {
     const newReview = new ReviewModel({ recipeId, comment, rating, userId });
     await newReview.save();
 
-    // Update the recipe's average rating
-    const reviews = await ReviewModel.find({ recipeId })
-      .populate("userId", "name profileImage")
-      .exec();
-    const averageRating =
-      reviews.reduce((acc, review) => acc + review.rating, 0) / reviews.length;
+    const reviews = await ReviewModel.find({ recipeId }).exec();
+    const averageRating = reviews.length
+      ? reviews.reduce((acc, review) => acc + review.rating, 0) / reviews.length
+      : 0;
 
     await RecipesModel.findByIdAndUpdate(
       recipeId,
-      { $set: { averageRating } },
+      { averageRating }, // Make sure this line is correctly setting the average rating
       { new: true }
     );
 
-    res.status(201).json(reviews);
+    const updatedRecipe = await RecipesModel.findById(recipeId).exec();
+    res.status(201).json(updatedRecipe); // Return updated recipe to check the response
   } catch (error) {
     console.error("Error adding review:", error);
     res.status(500).json({ message: error.message });
   }
 });
 
+// Fetch all reviews for a recipe
 router.get("/getallreviews/:recipeId", async (req, res) => {
   const { recipeId } = req.params;
 
