@@ -12,23 +12,26 @@ const RecipesList = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const userID = useGetUserID();
 
-  useEffect(() => {
-    const fetchRecipesByCategory = async () => {
-      try {
-        const response = await axios.get(
-          `http://localhost:3001/recipes/category/${categoryName}`
-        );
-        setRecipes(response.data);
-      } catch (error) {
-        console.error("Error fetching recipes by category:", error);
-        setError("Failed to fetch recipes.");
-      }
-    };
-
-    if (categoryName) {
-      fetchRecipesByCategory();
+useEffect(() => {
+  console.log("Category Name:", categoryName); // Check the value of categoryName
+  const fetchRecipesByCategory = async () => {
+    try {
+      const response = await axios.get(
+        `http://localhost:3001/recipes/category/${categoryName}`
+      );
+      setRecipes(response.data);
+    } catch (error) {
+      console.error("Error fetching recipes by category:", error);
+      setError("Failed to fetch recipes.");
     }
-  }, [categoryName]);
+  };
+
+  if (categoryName) {
+    fetchRecipesByCategory();
+  }
+}, [categoryName]);
+
+
 
   useEffect(() => {
     const fetchSavedRecipes = async () => {

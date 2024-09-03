@@ -31,8 +31,10 @@ const storage = multer.diskStorage({
 });
 
 const upload = multer({ storage: storage });
-// Create a new recipe
-router.post("/", upload.single('image'), verifyToken, async (req, res) => {
+
+
+
+router.post("/", upload.single("image"), verifyToken, async (req, res) => {
   const {
     name,
     description,
@@ -42,10 +44,18 @@ router.post("/", upload.single('image'), verifyToken, async (req, res) => {
     userOwner,
     categories,
   } = req.body;
-  const imageUrl = req.file ? req.file.path : null
+
+  const imageUrl = req.file ? req.file.path : null;
+
+  // Log the received file information
+  console.log("Uploaded file info:", req.file);
+
   if (!imageUrl) {
-    return res.status(400).json({ message: "Image upload failed. Image is required." });
+    return res
+      .status(400)
+      .json({ message: "Image upload failed. Image is required." });
   }
+
   try {
     const newRecipe = new RecipesModel({
       name,
@@ -55,12 +65,12 @@ router.post("/", upload.single('image'), verifyToken, async (req, res) => {
       imageUrl,
       cookingTime,
       userOwner,
-      categories,
+      categories: JSON.parse(categories), // Ensure this is correctly parsed
     });
 
     await newRecipe.save();
 
-    for (const category of categories) {
+    for (const category of JSON.parse(categories)) {
       const existingCategory = await CategoryModel.findOne({ name: category });
       if (!existingCategory) {
         const newCategory = new CategoryModel({ name: category });
