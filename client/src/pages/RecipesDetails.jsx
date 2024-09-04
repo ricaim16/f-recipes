@@ -3,28 +3,47 @@ import axios from "axios";
 import { useState, useEffect } from "react";
 import { FaStar } from "react-icons/fa";
 import format from "date-fns/format";
-import { useUserID } from "../hooks/useUserID"; // Ensure this is correct
+import { useUserID } from "../hooks/useUserID";
 
 const RecipeDetails = () => {
   const { id } = useParams();
-  const { user } = useUserID(); // Fetch user information
+  const { user } = useUserID();
   const [recipe, setRecipe] = useState(null);
   const [reviews, setReviews] = useState([]);
   const [newReview, setNewReview] = useState({ comment: "", rating: 5 });
   const [errorMessage, setErrorMessage] = useState("");
   const [loading, setLoading] = useState(true);
-  const backendUrl = "http://localhost:3001"; // Use environment variable
+  const backendUrl = "http://localhost:3001";
 
   useEffect(() => {
-    const fetchRecipe = async () => {
+const fetchRecipe = async () => {
+  try {
+    const response = await axios.get(`${backendUrl}/recipes/${id}`);
+    let ingredients = response.data.ingredients;
+
+    // Check if ingredients is an array with a single string element
+    if (
+      Array.isArray(ingredients) &&
+      ingredients.length === 1 &&
+      typeof ingredients[0] === "string"
+    ) {
       try {
-        const response = await axios.get(`${backendUrl}/recipes/${id}`);
-        setRecipe(response.data);
-      } catch (error) {
-        console.error("Failed to fetch recipe:", error);
-        setErrorMessage("Failed to load recipe details.");
+        // Attempt to parse the string to an array
+        ingredients = JSON.parse(ingredients[0]);
+      } catch (parseError) {
+        console.error("Failed to parse ingredients JSON:", parseError);
+        ingredients = []; // Default to empty array if parsing fails
+        setErrorMessage("Failed to parse ingredients data.");
       }
-    };
+    }
+
+    console.log(ingredients); // Check the type and contents
+    setRecipe({ ...response.data, ingredients });
+  } catch (error) {
+    console.error("Failed to fetch recipe:", error);
+    setErrorMessage("Failed to load recipe details.");
+  }
+};
 
     const fetchReviews = async () => {
       try {
@@ -123,132 +142,131 @@ const RecipeDetails = () => {
             <h2 className="text-2xl font-semibold mb-2">{recipe.name}</h2>
             <p className="text-gray-700 text-base mb-4">{recipe.description}</p>
 
-            <div className="flex-1 mb-6">
-              <h3 className="text-xl font-medium mb-3">Ingredients</h3>
-              <ul className="list-disc pl-6 text-gray-700 text-base mb-4">
-                {recipe.ingredients && recipe.ingredients.length > 0 ? (
-                  recipe.ingredients.map((ingredient, index) => (
-                    <li key={index}>
-                      {ingredient.quantity} {ingredient.unit} {ingredient.name}
-                    </li>
-                  ))
-                ) : (
-                  <p>No ingredients available.</p>
-                )}
-              </ul>
-              <h3 className="text-xl font-medium mb-3">Instructions</h3>
-              <p className="text-gray-700 text-base mb-5">
-                {renderInstructions()}
+            <h3 className="text-xl font-medium mb-3">Ingredients</h3>
+            <ul className="list-disc pl-6 text-gray-700 text-base mb-4 list-inside">
+              {recipe.ingredients && recipe.ingredients.length > 0 ? (
+                recipe.ingredients.map((ingredient, index) => (
+                  <li key={index} className="mb-1.5">
+                    {ingredient}
+                  </li>
+                ))
+              ) : (
+                <p>No ingredients available.</p>
+              )}
+            </ul>
+
+            <h3 className="text-xl font-medium mb-3">Instructions</h3>
+            <p className="text-gray-700 text-base mb-5">
+              {renderInstructions()}
+            </p>
+            <div className="flex justify-between items-center mb-6">
+              <p className="text-gray-700 text-base">
+                Cooking Time: {recipe.cookingTime} minutes
               </p>
-              <div className="flex justify-between items-center mb-6">
-                <p className="text-gray-700 text-base">
-                  Cooking Time: {recipe.cookingTime} minutes
-                </p>
-              </div>
             </div>
+          </div>
 
-            <div className="mt-12">
-              <h2 className="text-2xl font-semibold text-gray-800 mb-6">
-                Reviews
-              </h2>
-              <div className="space-y-4">
-                {reviews.length > 0 ? (
-                  reviews.map((review) => (
-                    <div
-                      key={review._id}
-                      className="p-4 bg-gray-200 rounded-lg shadow-md flex items-start space-x-4"
-                    >
-                      <div className="flex-shrink-0">
-                        <img
-                          src={
-                            review.userId?.profileImage
-                              ? `${backendUrl}${review.userId.profileImage}`
-                              : "/default-profile.png" // Ensure correct path
-                          }
-                          alt={review.userId?.name || "Anonymous"}
-                          className="w-12 h-12 object-cover rounded-full border border-gray-300"
-                        />
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex justify-between items-center mb-2">
-                          <span className="font-semibold text-gray-800">
-                            {review.userId?.name || "Anonymous"}
-                          </span>
-                          <div className="flex items-center text-yellow-500">
-                            {[...Array(5)].map((_, index) => (
-                              <FaStar
-                                key={index}
-                                className={`text-xl ${
-                                  index < review.rating
-                                    ? "text-yellow-500"
-                                    : "text-gray-300"
-                                }`}
-                              />
-                            ))}
-                          </div>
-                        </div>
-                        <p className="text-gray-700">{review.comment}</p>
-                        <span className="text-xs text-gray-500 block mt-2">
-                          {formatDate(review.createdAt)}
-                        </span>
-                      </div>
+          <div className="mt-12">
+            <h2 className="text-2xl font-semibold text-gray-800 mb-6">
+              Reviews
+            </h2>
+            <div className="space-y-4">
+              {reviews.length > 0 ? (
+                reviews.map((review) => (
+                  <div
+                    key={review._id}
+                    className="p-4 bg-gray-200 rounded-lg shadow-md flex items-start space-x-4"
+                  >
+                    <div className="flex-shrink-0">
+                      <img
+                        src={
+                          review.userId?.profileImage
+                            ? `${backendUrl}${review.userId.profileImage}`
+                            : "/default-profile.png"
+                        }
+                        alt={review.userId?.name || "Anonymous"}
+                        className="w-12 h-12 object-cover rounded-full border border-gray-300"
+                      />
                     </div>
-                  ))
-                ) : (
-                  <p className="text-gray-600">
-                    No reviews yet. Be the first to share your thoughts!
-                  </p>
-                )}
-              </div>
-
-              {user ? (
-                <form
-                  onSubmit={handleSubmitReview}
-                  className="mt-8 bg-white p-6 rounded-lg shadow-md"
-                >
-                  <h3 className="text-xl font-semibold mb-4">
-                    Add Your Moment and Rate the Recipe
-                  </h3>
-                  <textarea
-                    name="comment"
-                    value={newReview.comment}
-                    onChange={handleInputChange}
-                    placeholder="Write your review..."
-                    className="w-full h-32 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 mb-4"
-                    required
-                  ></textarea>
-                  <div className="flex items-center mb-4">
-                    <label className="mr-4 text-gray-700 font-medium">
-                      Rating:
-                    </label>
-                    <div className="flex space-x-1">
-                      {[1, 2, 3, 4, 5].map((star) => (
-                        <FaStar
-                          key={star}
-                          className={`text-2xl cursor-pointer ${
-                            newReview.rating >= star
-                              ? "text-yellow-500"
-                              : "text-gray-300"
-                          }`}
-                          onClick={() => handleStarClick(star)}
-                        />
-                      ))}
+                    <div className="flex-1">
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="font-semibold text-gray-800">
+                          {review.userId?.name || "Anonymous"}
+                        </span>
+                        <div className="flex items-center text-yellow-500">
+                          {[...Array(5)].map((_, index) => (
+                            <FaStar
+                              key={index}
+                              className={`text-xl ${
+                                index < review.rating
+                                  ? "text-yellow-500"
+                                  : "text-gray-300"
+                              }`}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                      <p className="text-gray-700">{review.comment}</p>
+                      <span className="text-xs text-gray-500 block mt-2">
+                        {formatDate(review.createdAt)}
+                      </span>
                     </div>
                   </div>
-                  {errorMessage && (
-                    <p className="text-red-500 mb-4">{errorMessage}</p>
-                  )}
-                  <button
-                    type="submit"
-                    className="py-2 px-4 text-white bg-indigo-600 rounded-lg shadow-md hover:bg-indigo-700 transition duration-200"
-                  >
-                    Submit Review
-                  </button>
-                </form>
+                ))
               ) : (
-                <p className="text-gray-600">Please log in to add a review.</p>
+                <p className="text-gray-600">
+                  No reviews yet. Be the first to share your thoughts!
+                </p>
               )}
             </div>
+
+            {user ? (
+              <form
+                onSubmit={handleSubmitReview}
+                className="mt-8 bg-white p-6 rounded-lg shadow-md"
+              >
+                <h3 className="text-xl font-semibold mb-4">
+                  Add Your Moment and Rate the Recipe
+                </h3>
+                <textarea
+                  name="comment"
+                  value={newReview.comment}
+                  onChange={handleInputChange}
+                  placeholder="Write your review..."
+                  className="w-full h-32 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 mb-4"
+                  required
+                ></textarea>
+                <div className="flex items-center mb-4">
+                  <label className="mr-4 text-gray-700 font-medium">
+                    Rating:
+                  </label>
+                  <div className="flex space-x-1">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <FaStar
+                        key={star}
+                        className={`text-2xl cursor-pointer ${
+                          newReview.rating >= star
+                            ? "text-yellow-500"
+                            : "text-gray-300"
+                        }`}
+                        onClick={() => handleStarClick(star)}
+                      />
+                    ))}
+                  </div>
+                </div>
+                {errorMessage && (
+                  <p className="text-red-500 mb-4">{errorMessage}</p>
+                )}
+                <button
+                  type="submit"
+                  className="py-2 px-4 text-white bg-indigo-600 rounded-lg shadow-md hover:bg-indigo-700 transition duration-200"
+                >
+                  Submit Review
+                </button>
+              </form>
+            ) : (
+              <p className="text-gray-600">Please log in to add a review.</p>
+            )}
           </div>
         </div>
       ) : (

@@ -131,7 +131,7 @@ export const Recipes = () => {
                   className="w-full h-56 object-cover mb-4"
                 />
                 <p className="text-gray-700 text-base mb-4">{recipe.name}</p>
-                <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center justify-between mb-2">
                   <p className="text-gray-700 text-base">
                     Cooking Time: {recipe.cookingTime} minutes
                   </p>

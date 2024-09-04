@@ -177,7 +177,6 @@ router.get("/getuser/:id", async (req, res) => {
       res.status(200).json({
         name: user.name,
         email: user.email,
-        bio: user.bio,
         profileImage: user.profileImage,
       });
     } else {

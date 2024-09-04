@@ -60,7 +60,7 @@ router.post("/", upload.single("image"), verifyToken, async (req, res) => {
     const newRecipe = new RecipesModel({
       name,
       description,
-      ingredients,
+      ingredients: JSON.parse(ingredients),
       instructions,
       imageUrl,
       cookingTime,
@@ -145,20 +145,27 @@ router.get("/savedRecipes/ids/:userID", async (req, res) => {
   }
 });
 
-// Get saved recipes
 router.get("/savedRecipes/:userID", async (req, res) => {
   try {
+    // Find the user by ID
     const user = await UserModel.findById(req.params.userID);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Find saved recipes of the user
     const savedRecipes = await RecipesModel.find({
       _id: { $in: user.savedRecipes },
+    })
+      .populate("userOwner") // Populate userOwner field with user data
+      .sort({ createdAt: -1 }); // Optional: Sort by creation date, newest first
 
-    });
-    res.json({ savedRecipes });
-
-
+    // Return the saved recipes with populated user details
+    res.status(200).json({ savedRecipes });
   } catch (err) {
-
-    res.json(err);
+    console.error("Error fetching saved recipes:", err);
+    res.status(500).json({ error: err.message });
   }
 });
 
@@ -168,7 +175,10 @@ router.get("/category/:categoryName", async (req, res) => {
     const { categoryName } = req.params;
     const recipes = await RecipesModel.find({
       categories: { $in: [categoryName] },
-    });
+    })
+      .populate('userOwner') // Populate the 'userOwner' field with user data
+      .sort({ createdAt: -1 }); // Optional: Sort by creation date, newest first
+
     res.status(200).json(recipes);
   } catch (err) {
     console.error("Error fetching recipes by category:", err);
