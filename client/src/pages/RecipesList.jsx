@@ -49,10 +49,16 @@ const RecipesList = () => {
     fetchSavedRecipes();
   }, [userID]);
 
-  const saveRecipe = async (recipeID) => {
+  const toggleRecipe = async (recipeID) => {
+    if (!userID) return;
+
     try {
+      const isSaved = savedRecipes.includes(recipeID);
+      const url = `http://localhost:3001/recipes/${
+        isSaved ? "remove" : "save"
+      }`;
       const response = await axios.put(
-        "http://localhost:3001/recipes",
+        url,
         { recipeID, userID },
         {
           headers: {
@@ -63,15 +69,14 @@ const RecipesList = () => {
       setSavedRecipes(response.data.savedRecipes || []);
     } catch (err) {
       console.log(
-        "Error saving recipe:",
+        "Error toggling recipe:",
         err.response ? err.response.data : err.message
       );
-      setError("Failed to save recipe.");
+      setError("Failed to toggle recipe.");
     }
   };
 
-  const isRecipeSaved = (id) =>
-    Array.isArray(savedRecipes) && savedRecipes.includes(id);
+  const isRecipeSaved = (id) => savedRecipes.includes(id);
 
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);
@@ -150,7 +155,7 @@ const RecipesList = () => {
                     Cooking Time: {recipe.cookingTime} minutes
                   </p>
                   <button
-                    onClick={() => saveRecipe(recipe._id)}
+                    onClick={() => toggleRecipe(recipe._id)}
                     className={`p-2 rounded ${
                       isRecipeSaved(recipe._id)
                         ? "text-yellow-500"
@@ -184,4 +189,5 @@ const RecipesList = () => {
     </div>
   );
 };
+
 export default RecipesList;

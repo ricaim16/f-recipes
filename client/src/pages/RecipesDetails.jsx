@@ -16,34 +16,34 @@ const RecipeDetails = () => {
   const backendUrl = "http://localhost:3001";
 
   useEffect(() => {
-const fetchRecipe = async () => {
-  try {
-    const response = await axios.get(`${backendUrl}/recipes/${id}`);
-    let ingredients = response.data.ingredients;
+  const fetchRecipe = async () => {
+    try {
+      const response = await axios.get(`${backendUrl}/recipes/${id}`);
+      let ingredients = response.data.ingredients;
 
-    // Check if ingredients is an array with a single string element
-    if (
-      Array.isArray(ingredients) &&
-      ingredients.length === 1 &&
-      typeof ingredients[0] === "string"
-    ) {
-      try {
-        // Attempt to parse the string to an array
-        ingredients = JSON.parse(ingredients[0]);
-      } catch (parseError) {
-        console.error("Failed to parse ingredients JSON:", parseError);
-        ingredients = []; // Default to empty array if parsing fails
-        setErrorMessage("Failed to parse ingredients data.");
+      // Check if ingredients is an array with a single string element
+      if (
+        Array.isArray(ingredients) &&
+        ingredients.length === 1 &&
+        typeof ingredients[0] === "string"
+      ) {
+        try {
+          // Attempt to parse the string to an array
+          ingredients = JSON.parse(ingredients[0]);
+        } catch (parseError) {
+          console.error("Failed to parse ingredients JSON:", parseError);
+          ingredients = []; // Default to empty array if parsing fails
+          setErrorMessage("Failed to parse ingredients data.");
+        }
       }
-    }
 
-    console.log(ingredients); // Check the type and contents
-    setRecipe({ ...response.data, ingredients });
-  } catch (error) {
-    console.error("Failed to fetch recipe:", error);
-    setErrorMessage("Failed to load recipe details.");
-  }
-};
+      console.log(ingredients); // Check the type and contents
+      setRecipe({ ...response.data, ingredients });
+    } catch (error) {
+      console.error("Failed to fetch recipe:", error);
+      setErrorMessage("Failed to load recipe details.");
+    }
+  };
 
     const fetchReviews = async () => {
       try {

@@ -14,25 +14,29 @@ router.get("/", async (req, res) => {
     const { category } = req.query; // Get category from query parameters
 
     const query = category ? { categories: category } : {};
-    const result = await RecipesModel.find(query).populate('userOwner').sort({ createdAt: -1 });
+    const result = await RecipesModel.find(query)
+      .populate("userOwner")
+      .sort({ createdAt: -1 });
     res.status(200).json(result);
   } catch (err) {
     console.error("Error fetching recipes:", err);
     res.status(500).json({ error: err.message });
   }
 });
+
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, 'recipePic/');
+    cb(null, "recipePic/");
   },
   filename: (req, file, cb) => {
-    cb(null, file.filename + '-' + Date.now() + path.extname(file.originalname));
-  }
+    cb(
+      null,
+      file.filename + "-" + Date.now() + path.extname(file.originalname)
+    );
+  },
 });
 
 const upload = multer({ storage: storage });
-
-
 
 router.post("/", upload.single("image"), verifyToken, async (req, res) => {
   const {
@@ -105,7 +109,7 @@ router.get("/:recipeId", async (req, res) => {
 });
 
 // Save a Recipe
-router.put("/", async (req, res) => {
+router.put("/save", async (req, res) => {
   const { recipeID, userID } = req.body;
 
   if (
@@ -135,33 +139,61 @@ router.put("/", async (req, res) => {
   }
 });
 
+// Remove a Recipe
+router.put("/remove", async (req, res) => {
+  const { recipeID, userID } = req.body;
+
+  if (
+    !mongoose.Types.ObjectId.isValid(recipeID) ||
+    !mongoose.Types.ObjectId.isValid(userID)
+  ) {
+    return res.status(400).json({ message: "Invalid recipe ID or user ID" });
+  }
+
+  try {
+    const user = await UserModel.findById(userID);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Remove the recipe ID from the user's saved recipes
+    user.savedRecipes = user.savedRecipes.filter((id) => !id.equals(recipeID));
+
+    await user.save();
+
+    res.status(200).json({ savedRecipes: user.savedRecipes });
+  } catch (err) {
+    console.error("Error removing recipe:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Get ids of saved recipes
 router.get("/savedRecipes/ids/:userID", async (req, res) => {
   try {
     const user = await UserModel.findById(req.params.userID);
     res.json({ savedRecipes: user?.savedRecipes });
   } catch (err) {
-    res.json(err);
+    console.error("Error fetching saved recipes:", err);
+    res.status(500).json({ error: err.message });
   }
 });
 
 router.get("/savedRecipes/:userID", async (req, res) => {
   try {
-    // Find the user by ID
     const user = await UserModel.findById(req.params.userID);
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // Find saved recipes of the user
     const savedRecipes = await RecipesModel.find({
       _id: { $in: user.savedRecipes },
     })
-      .populate("userOwner") // Populate userOwner field with user data
-      .sort({ createdAt: -1 }); // Optional: Sort by creation date, newest first
+      .populate("userOwner")
+      .sort({ createdAt: -1 });
 
-    // Return the saved recipes with populated user details
     res.status(200).json({ savedRecipes });
   } catch (err) {
     console.error("Error fetching saved recipes:", err);
@@ -176,8 +208,8 @@ router.get("/category/:categoryName", async (req, res) => {
     const recipes = await RecipesModel.find({
       categories: { $in: [categoryName] },
     })
-      .populate('userOwner') // Populate the 'userOwner' field with user data
-      .sort({ createdAt: -1 }); // Optional: Sort by creation date, newest first
+      .populate("userOwner")
+      .sort({ createdAt: -1 });
 
     res.status(200).json(recipes);
   } catch (err) {

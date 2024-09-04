@@ -15,13 +15,13 @@ export const Recipes = () => {
     const fetchRecipes = async () => {
       try {
         const response = await axios.get("http://localhost:3001/recipes");
-        console.log("Fetched recipes:", response.data); // Log to check averageRating
         setRecipes(response.data);
       } catch (err) {
         console.error("Error fetching recipes:", err);
         setError("Failed to fetch recipes.");
       }
     };
+
     const fetchSavedRecipes = async () => {
       if (!userID) return;
       try {
@@ -40,25 +40,25 @@ export const Recipes = () => {
     fetchSavedRecipes();
   }, [userID]);
 
-  const saveRecipe = async (recipeID) => {
+  const toggleRecipe = async (recipeID) => {
     if (!userID) return;
     try {
-      const response = await axios.put("http://localhost:3001/recipes", {
-        recipeID,
-        userID,
-      });
+      const isSaved = savedRecipes.includes(recipeID);
+      const url = `http://localhost:3001/recipes/${
+        isSaved ? "remove" : "save"
+      }`;
+      const response = await axios.put(url, { recipeID, userID });
       setSavedRecipes(response.data.savedRecipes || []);
     } catch (err) {
       console.error(
-        "Error saving recipe:",
+        "Error toggling recipe:",
         err.response ? err.response.data : err.message
       );
-      setError("Failed to save recipe.");
+      setError("Failed to toggle recipe.");
     }
   };
 
-  const isRecipeSaved = (id) =>
-    Array.isArray(savedRecipes) && savedRecipes.includes(id);
+  const isRecipeSaved = (id) => savedRecipes.includes(id);
 
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);
@@ -136,7 +136,7 @@ export const Recipes = () => {
                     Cooking Time: {recipe.cookingTime} minutes
                   </p>
                   <button
-                    onClick={() => saveRecipe(recipe._id)}
+                    onClick={() => toggleRecipe(recipe._id)}
                     className={`p-2 rounded ${
                       isRecipeSaved(recipe._id)
                         ? "text-yellow-500"
