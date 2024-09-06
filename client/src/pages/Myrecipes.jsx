@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react"; // Import React and hooks
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCookies } from "react-cookie";
 import axios from "axios";
@@ -41,6 +41,24 @@ const MyRecipes = () => {
 
     fetchRecipes();
   }, [userID, token, backendUrl]);
+
+  const handleDelete = async (recipeID) => {
+    try {
+      await axios.delete(`${backendUrl}/recipes/delete/${recipeID}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setRecipes(recipes.filter(recipe => recipe._id !== recipeID));
+    } catch (error) {
+      setError("Error deleting recipe. Please try again later.");
+      console.error("Error deleting recipe:", error.message);
+    }
+  };
+
+  const handleEdit = (recipeID) => {
+    navigate(`/edit-recipe/${recipeID}`);
+  };
 
   // Filter recipes based on searchQuery
   const filteredRecipes = recipes.filter((recipe) =>
@@ -89,6 +107,17 @@ const MyRecipes = () => {
       <h1 className="text-4xl font-bold mb-8 text-center">My Recipes</h1>
       {error && <p className="text-red-500 text-center mb-4">{error}</p>}
 
+      <div className="mb-4 flex justify-center">
+        <input
+          type="text"
+          value={searchQuery}
+          onChange={handleSearchChange}
+          placeholder="Search recipes..."
+          className="p-2 border border-gray-300 rounded"
+        />
+        <FaSearch className="ml-2 text-gray-500" />
+      </div>
+
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
         {filteredRecipes.map((recipe) => {
           const userOwnerData = recipe.userOwner || {};
@@ -97,7 +126,6 @@ const MyRecipes = () => {
             <div
               key={recipe._id}
               className="bg-white shadow-lg rounded-lg overflow-hidden flex flex-col"
-              onClick={() => handleRecipeClick(recipe._id)}
             >
               <div className="flex-1 p-6 flex flex-col">
                 <div className="flex items-center mb-4">
@@ -149,6 +177,21 @@ const MyRecipes = () => {
                 <p className="text-gray-700 text-base mb-5">
                   {renderInstructions(recipe.instructions)}
                 </p>
+
+                <div className="flex justify-between">
+                  <button
+                    onClick={() => handleEdit(recipe._id)}
+                    className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => handleDelete(recipe._id)}
+                    className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+                  >
+                    Delete
+                  </button>
+                </div>
               </div>
             </div>
           );

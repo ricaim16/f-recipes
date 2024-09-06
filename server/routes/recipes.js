@@ -246,4 +246,46 @@ router.get("/user/:userID", async (req, res) => {
   }
 });
 
+
+
+router.delete("/delete/:recipeID", (req, res) => {
+  const recipeID = req.params.recipeID;
+  RecipesModel.findByIdAndDelete(recipeID)
+    .then((result) => {
+      if (!result) {
+        return res.status(404).json({ message: "Recipe not found" });
+      }
+      res.status(200).json({ message: "Recipe deleted successfully" });
+    })
+    .catch((err) => res.status(500).json({ error: err.message }));
+});
+
+
+
+router.put("/edit/:recipeID", (req, res) => {
+  const recipeID = req.params.recipeID;
+  RecipesModel.findByIdAndUpdate(
+    recipeID,
+    {
+      name: req.body.name,
+      description: req.body.description,
+      ingredients: req.body.ingredients,
+      instructions: req.body.instructions,
+      cookingTime: req.body.cookingTime,
+      userOwner: req.body.userOwner,
+      createdBy: req.body.createdBy,
+      categories: req.body.categories,
+    },
+    { new: true } // Return the updated document
+  )
+    .then((updatedRecipe) => {
+      if (!updatedRecipe) {
+        return res.status(404).json({ message: "Recipe not found" });
+      }
+      res.status(200).json(updatedRecipe);
+    })
+    .catch((err) => res.status(500).json({ error: err.message }));
+});
+
+
 export { router as recipesRouter };

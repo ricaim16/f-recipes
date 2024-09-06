@@ -10,6 +10,7 @@ import { SavedRecipes } from "./pages/Saved-recipes";
 import RecipesList from "./pages/RecipesList"; // Corrected import path
 import RecipeDetails from "./pages/RecipesDetails";
 import MyRecipes from "./pages/Myrecipes";
+import EditRecipe from "./pages/Edit";
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
           <Route path="/create-recipes" element={<CreateRecipes />} />
           <Route path="/recipes/:id" element={<RecipeDetails />} />
           <Route path="/my-recipes" element={<MyRecipes />} />
+          <Route path="/edit-recipe/:recipeID" element={<EditRecipe />} />
           <Route
             path="/recipes/category/:categoryName"
             element={<RecipesList />}
