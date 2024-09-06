@@ -21,45 +21,29 @@ export const Recipes = () => {
   };
 
   useEffect(() => {
-    const fetchRecipes = async () => {
+    const fetchData = async () => {
       try {
-        const response = await axios.get(`${backendUrl}/recipes`);
-        setRecipes(response.data);
+        const recipesResponse = await axios.get(`${backendUrl}/recipes`);
+        setRecipes(recipesResponse.data);
+
+        if (userID) {
+          const savedResponse = await axios.get(
+            `${backendUrl}/recipes/savedRecipes/ids/${userID}`
+          );
+          setSavedRecipes(savedResponse.data.savedRecipes || []);
+
+          const likedResponse = await axios.get(
+            `${backendUrl}/likes/likedrecipes/${userID}`
+          );
+          setLikedRecipes(likedResponse.data.map((recipe) => recipe.recipeId));
+        }
       } catch (err) {
-        console.error("Error fetching recipes:", err);
-        setError("Failed to fetch recipes.");
+        console.error("Error fetching data:", err);
+        setError("Failed to fetch data.");
       }
     };
 
-    const fetchSavedRecipes = async () => {
-      if (!userID) return;
-      try {
-        const response = await axios.get(
-          `${backendUrl}/recipes/savedRecipes/ids/${userID}`
-        );
-        setSavedRecipes(response.data.savedRecipes || []);
-      } catch (err) {
-        console.error("Error fetching saved recipes:", err);
-        setError("Failed to fetch saved recipes.");
-      }
-    };
-
-    const fetchLikedRecipes = async () => {
-      if (!userID) return;
-      try {
-        const response = await axios.get(
-          `${backendUrl}/likes/likedrecipes/${userID}`
-        );
-        setLikedRecipes(response.data.map((recipe) => recipe.recipeId));
-      } catch (err) {
-        console.error("Error fetching liked recipes:", err);
-        setError("Failed to fetch liked recipes.");
-      }
-    };
-
-    fetchRecipes();
-    fetchSavedRecipes();
-    fetchLikedRecipes();
+    fetchData();
   }, [userID]);
 
   const toggleRecipe = async (recipeID) => {
@@ -84,10 +68,10 @@ export const Recipes = () => {
       const url = `${backendUrl}/likes/addlike`;
       await axios.post(url, {
         likedBy: userID,
-        recipeOwner: userID, // Assuming the user who likes is also the recipe owner
+        recipeOwner: userID,
         recipeId: recipeID,
       });
-      // Update liked recipes and like count
+
       const [likedResponse, countResponse] = await Promise.all([
         axios.get(`${backendUrl}/likes/likedrecipes/${userID}`),
         axios.get(`${backendUrl}/likes/countLikes/${recipeID}`),
@@ -96,7 +80,7 @@ export const Recipes = () => {
       setLikedRecipes(likedResponse.data.map((recipe) => recipe.recipeId));
       setLikeCount((prev) => ({
         ...prev,
-        [recipeID]: countResponse.data.totalLikes,
+        [recipeID]: countResponse.data.totalLikes || 0,
       }));
     } catch (err) {
       console.error(
@@ -106,8 +90,6 @@ export const Recipes = () => {
       setError("Failed to toggle like.");
     }
   };
-
-  
 
   const isRecipeSaved = (id) => savedRecipes.includes(id);
   const isRecipeLiked = (id) => likedRecipes.includes(id);
@@ -124,14 +106,13 @@ export const Recipes = () => {
     if (rating == null || isNaN(rating)) rating = 0;
     const fullStars = Math.floor(rating);
     const halfStar = rating % 1 >= 0.5;
-    const stars = [...Array(5)].map((_, index) => {
+    return [...Array(5)].map((_, index) => {
       if (index < fullStars)
         return <FaStar key={index} className="text-yellow-500 text-lg" />;
       if (index === fullStars && halfStar)
         return <FaStar key={index} className="text-yellow-500 text-lg" />;
       return <FaStar key={index} className="text-gray-300 text-lg" />;
     });
-    return stars;
   };
 
   return (

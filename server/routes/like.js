@@ -49,28 +49,22 @@ router.post("/addlike", async (req, res) => {
 });
 
 
-// Count likes for a specific recipe
+// Get like count for a recipe
 router.get("/countLikes/:recipeId", async (req, res) => {
-  const { recipeId } = req.params;
-
-  if (!mongoose.Types.ObjectId.isValid(recipeId)) {
-    return res.status(400).json({ message: "Invalid recipe ID" });
-  }
-
   try {
-    const result = await LikeModel.aggregate([
-      { $match: { recipeId: new mongoose.Types.ObjectId(recipeId) } },
-      { $count: "totalLikes" },
-    ]);
+    const recipe = await RecipesModel.findById(req.params.recipeId);
+    if (!recipe) {
+      return res.status(404).json({ message: "Recipe not found" });
+    }
 
-    const totalLikes = result.length > 0 ? result[0].totalLikes : 0;
-    res.status(200).json({ totalLikes });
-  } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Error counting likes", error: error.message });
+    res.status(200).json({ totalLikes: recipe.likesCount });
+  } catch (err) {
+    console.error("Error fetching like count:", err);
+    res.status(500).json({ error: err.message });
   }
 });
+
+
 
 // Get users who liked a specific recipe
 router.get("/getlikes/:recipeId", async (req, res) => {

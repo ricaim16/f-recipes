@@ -42,12 +42,7 @@ const recipeSchema = mongoose.Schema(
       },
     ],
     averageRating: { type: Number, default: 0 },
-    likes: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Users",
-      },
-    ],
+    likesCount: { type: Number, default: 0 },
     postedBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Users",
