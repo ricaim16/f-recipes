@@ -1,0 +1,147 @@
+[{
+  "_id": {
+    "$oid": "66db31e4d3e3eceb805bd7bd"
+  },
+  "likedBy": {
+    "$oid": "66da8098d63fab548df10bb4"
+  },
+  "recipeOwner": {
+    "$oid": "66da8098d63fab548df10bb4"
+  },
+  "recipeId": {
+    "$oid": "66daf47fa60e5bcb215c7926"
+  },
+  "createdAt": {
+    "$date": "2024-09-06T16:46:28.734Z"
+  },
+  "updatedAt": {
+    "$date": "2024-09-06T16:46:28.734Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "66db33d8d3e3eceb805bd7ed"
+  },
+  "likedBy": {
+    "$oid": "66da8098d63fab548df10bb4"
+  },
+  "recipeOwner": {
+    "$oid": "66da8098d63fab548df10bb4"
+  },
+  "recipeId": {
+    "$oid": "66d9988bdf3e1f4e3c51ef81"
+  },
+  "createdAt": {
+    "$date": "2024-09-06T16:54:48.574Z"
+  },
+  "updatedAt": {
+    "$date": "2024-09-06T16:54:48.574Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "66db34a0d3e3eceb805bd8ba"
+  },
+  "likedBy": {
+    "$oid": "66da8098d63fab548df10bb4"
+  },
+  "recipeOwner": {
+    "$oid": "66da8098d63fab548df10bb4"
+  },
+  "recipeId": {
+    "$oid": "66d999dbdf3e1f4e3c51f07c"
+  },
+  "createdAt": {
+    "$date": "2024-09-06T16:58:08.973Z"
+  },
+  "updatedAt": {
+    "$date": "2024-09-06T16:58:08.973Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "66db4c4892bdaf634918e4a1"
+  },
+  "likedBy": {
+    "$oid": "66da8098d63fab548df10bb4"
+  },
+  "recipeOwner": {
+    "$oid": "66da8098d63fab548df10bb4"
+  },
+  "recipeId": {
+    "$oid": "66d99957df3e1f4e3c51eff8"
+  },
+  "createdAt": {
+    "$date": "2024-09-06T18:39:04.765Z"
+  },
+  "updatedAt": {
+    "$date": "2024-09-06T18:39:04.765Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "66db4c6992bdaf634918e4b6"
+  },
+  "likedBy": {
+    "$oid": "66da8098d63fab548df10bb4"
+  },
+  "recipeOwner": {
+    "$oid": "66da8098d63fab548df10bb4"
+  },
+  "recipeId": {
+    "$oid": "66d97780226beaab33a07344"
+  },
+  "createdAt": {
+    "$date": "2024-09-06T18:39:37.713Z"
+  },
+  "updatedAt": {
+    "$date": "2024-09-06T18:39:37.713Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "66db4c8592bdaf634918e4cb"
+  },
+  "likedBy": {
+    "$oid": "66da8098d63fab548df10bb4"
+  },
+  "recipeOwner": {
+    "$oid": "66da8098d63fab548df10bb4"
+  },
+  "recipeId": {
+    "$oid": "66d970a9999dfee2436c432a"
+  },
+  "createdAt": {
+    "$date": "2024-09-06T18:40:05.079Z"
+  },
+  "updatedAt": {
+    "$date": "2024-09-06T18:40:05.079Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "66db52f4718cde25b1d1558a"
+  },
+  "likedBy": {
+    "$oid": "66d87ae9635b35693c525b29"
+  },
+  "recipeOwner": {
+    "$oid": "66d87ae9635b35693c525b29"
+  },
+  "recipeId": {
+    "$oid": "66daf47fa60e5bcb215c7926"
+  },
+  "createdAt": {
+    "$date": "2024-09-06T19:07:32.762Z"
+  },
+  "updatedAt": {
+    "$date": "2024-09-06T19:07:32.762Z"
+  },
+  "__v": 0
+}]

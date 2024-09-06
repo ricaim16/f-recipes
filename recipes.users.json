@@ -1,0 +1,60 @@
+[{
+  "_id": {
+    "$oid": "66d87ae9635b35693c525b29"
+  },
+  "name": "emm",
+  "email": "aimemu16@gmail.com",
+  "password": "$2b$10$hjRijfFT370n7Fvu8qd.f.AZuSo0uUv0JmiMqJ5p9UP0fJ8AsTJhi",
+  "profileImage": "66d87ae9635b35693c525b29.jpg",
+  "bio": "",
+  "savedRecipes": [
+    {
+      "$oid": "66d87b16635b35693c525b32"
+    },
+    {
+      "$oid": "66d88883cc58c4ca9534ac22"
+    },
+    {
+      "$oid": "66d91ac7dd84f8928ed729f4"
+    },
+    {
+      "$oid": "66d95a18c57aa971c57ce1db"
+    }
+  ],
+  "__v": 70,
+  "likedRecipes": [
+    {
+      "$oid": "66d87e3d95c1a250c3b19fc3"
+    },
+    {
+      "$oid": "66d88883cc58c4ca9534ac22"
+    },
+    {
+      "$oid": "66d88838cc58c4ca9534abd7"
+    }
+  ]
+},
+{
+  "_id": {
+    "$oid": "66da8098d63fab548df10bb4"
+  },
+  "name": "emebet atsbaha",
+  "email": "aimemu166@gmail.com",
+  "password": "$2b$10$rIHvj1LEupWLCpRbpPKAYeqElNoX3M9eALcpBYZ/AyAx3JveZlIYe",
+  "profileImage": "66da8098d63fab548df10bb4.png",
+  "bio": "",
+  "savedRecipes": [],
+  "__v": 6
+},
+{
+  "_id": {
+    "$oid": "66da8319d63fab548df10be0"
+  },
+  "name": "John Doe",
+  "email": "john.doe@example.com",
+  "password": "$2b$10$6SGORIc0Z9RLbSQmOmcTzeX1e3EtnplEuguFomngzi7/BSzhPo2Y.",
+  "profileImage": "",
+  "bio": "",
+  "savedRecipes": [],
+  "__v": 0
+}]

@@ -1,0 +1,112 @@
+[{
+  "_id": {
+    "$oid": "66d8825ae26f2d526b462bf1"
+  },
+  "recipeId": {
+    "$oid": "66d87e3d95c1a250c3b19fc3"
+  },
+  "comment": "bnnv ",
+  "rating": 4,
+  "userId": {
+    "$oid": "66d87ae9635b35693c525b29"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "66d888dccc58c4ca9534ac5e"
+  },
+  "recipeId": {
+    "$oid": "66d88838cc58c4ca9534abd7"
+  },
+  "comment": "ghk",
+  "rating": 5,
+  "userId": {
+    "$oid": "66d87ae9635b35693c525b29"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "66d888f4cc58c4ca9534ac79"
+  },
+  "recipeId": {
+    "$oid": "66d88883cc58c4ca9534ac22"
+  },
+  "comment": "cvhbjknl",
+  "rating": 3,
+  "userId": {
+    "$oid": "66d87ae9635b35693c525b29"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "66d91ad3dd84f8928ed72a0d"
+  },
+  "recipeId": {
+    "$oid": "66d91ac7dd84f8928ed729f4"
+  },
+  "comment": "zxgcfhjb",
+  "rating": 4,
+  "userId": {
+    "$oid": "66d87ae9635b35693c525b29"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "66d95a94c57aa971c57ce1f7"
+  },
+  "recipeId": {
+    "$oid": "66d95a18c57aa971c57ce1db"
+  },
+  "comment": "hgfh",
+  "rating": 5,
+  "userId": {
+    "$oid": "66d87ae9635b35693c525b29"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "66da0c89df3e1f4e3c520767"
+  },
+  "recipeId": {
+    "$oid": "66d999dbdf3e1f4e3c51f07c"
+  },
+  "comment": "emu",
+  "rating": 3,
+  "userId": {
+    "$oid": "66d87ae9635b35693c525b29"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "66daf4d7a60e5bcb215c7953"
+  },
+  "recipeId": {
+    "$oid": "66daf47fa60e5bcb215c7926"
+  },
+  "comment": "hj",
+  "rating": 4,
+  "userId": {
+    "$oid": "66da8098d63fab548df10bb4"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "66db07035145369857070821"
+  },
+  "recipeId": {
+    "$oid": "66daee50a60e5bcb215c78a5"
+  },
+  "comment": "et",
+  "rating": 4,
+  "userId": {
+    "$oid": "66da8098d63fab548df10bb4"
+  },
+  "__v": 0
+}]

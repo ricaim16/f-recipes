@@ -1,0 +1,104 @@
+[{
+  "_id": {
+    "$oid": "66d87b16635b35693c525b35"
+  },
+  "name": "Dinner",
+  "createdAt": {
+    "$date": "2024-09-04T15:21:58.815Z"
+  },
+  "updatedAt": {
+    "$date": "2024-09-04T15:21:58.815Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "66d88838cc58c4ca9534abda"
+  },
+  "name": "Lunch",
+  "createdAt": {
+    "$date": "2024-09-04T16:18:00.849Z"
+  },
+  "updatedAt": {
+    "$date": "2024-09-04T16:18:00.849Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "66d88883cc58c4ca9534ac25"
+  },
+  "name": "Fasting",
+  "createdAt": {
+    "$date": "2024-09-04T16:19:15.947Z"
+  },
+  "updatedAt": {
+    "$date": "2024-09-04T16:19:15.947Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "66d95a18c57aa971c57ce1df"
+  },
+  "name": "Desserts",
+  "createdAt": {
+    "$date": "2024-09-05T07:13:28.326Z"
+  },
+  "updatedAt": {
+    "$date": "2024-09-05T07:13:28.326Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "66d970a9999dfee2436c432d"
+  },
+  "name": "Vegetable",
+  "createdAt": {
+    "$date": "2024-09-05T08:49:45.600Z"
+  },
+  "updatedAt": {
+    "$date": "2024-09-05T08:49:45.600Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "66d979f4226beaab33a07379"
+  },
+  "name": "Drink",
+  "createdAt": {
+    "$date": "2024-09-05T09:29:24.337Z"
+  },
+  "updatedAt": {
+    "$date": "2024-09-05T09:29:24.337Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "66d9966ddf3e1f4e3c51ef12"
+  },
+  "name": "Snacks",
+  "createdAt": {
+    "$date": "2024-09-05T11:30:53.441Z"
+  },
+  "updatedAt": {
+    "$date": "2024-09-05T11:30:53.441Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "66da98a7d9b231ec72ffbb37"
+  },
+  "name": "Breakfast",
+  "createdAt": {
+    "$date": "2024-09-06T05:52:39.572Z"
+  },
+  "updatedAt": {
+    "$date": "2024-09-06T05:52:39.572Z"
+  },
+  "__v": 0
+}]
