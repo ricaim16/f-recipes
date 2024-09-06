@@ -38,6 +38,36 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
+router.post('/like', async (req, res) => {
+  const { userId, postId } = req.body; // assuming userId is sent in the request body
+
+  try {
+    const recipe = await RecipesModel.findById(postId);
+
+    if (!recipe) return res.status(404).json({ message: 'Recipe not found' });
+    // console.log(recipe);
+
+    // Check if the user has already liked the post
+    if (recipe.likedBy.includes(userId)) {
+      // Unlike the post
+      if (recipe.likesCount === 0) {
+        recipe.likesCount = 0;
+      } else {
+        recipe.likesCount -= 1;
+      }
+      recipe.likedBy.pull(userId);
+    } else {
+      // Like the post
+      recipe.likesCount += 1;
+      recipe.likedBy.push(userId);
+    }
+
+    await recipe.save();
+    res.json(recipe);
+  } catch (error) {
+    res.status(500).json({ message: error });
+  }
+});
 router.post("/", upload.single("image"), verifyToken, async (req, res) => {
   const {
     name,
