@@ -81,13 +81,19 @@ router.get("/getlikes/:recipeId", async (req, res) => {
   }
 
   try {
-    const likers = await LikeModel.find({ recipeId }).populate(
-      "likedBy",
-      "name"
-    );
+    // Find likes for the given recipeId and populate likedBy
+    const likers = await LikeModel.find({ recipeId })
+      .populate("likedBy", "name") // Populate the likedBy field with user data
+      .exec();
+
+    // Debugging: Log the result of the query
+    console.log("Likers with populated data:", likers);
+
+    // Map the results to include only necessary details
     const likersDetails = likers.map((like) => ({
-      likedBy: like.likedBy.name,
+      likedBy: like.likedBy ? like.likedBy.name : "Unknown",
     }));
+
     res.status(200).json({ likers: likersDetails });
   } catch (error) {
     res
@@ -96,16 +102,19 @@ router.get("/getlikes/:recipeId", async (req, res) => {
   }
 });
 
-// Get liked recipes by a specific user
-router.get("/likedrecipes/:userId", async (req, res) => {
-  const { userId } = req.params;
 
-  if (!mongoose.Types.ObjectId.isValid(userId)) {
+
+
+// Get liked recipes by a specific user
+router.get("/likedrecipes/:userID", async (req, res) => {
+  const { userID } = req.params;
+
+  if (!mongoose.Types.ObjectId.isValid(userID)) {
     return res.status(400).json({ message: "Invalid user ID" });
   }
 
   try {
-    const likes = await LikeModel.find({ likedBy: userId }).populate(
+    const likes = await LikeModel.find({ likedBy: userID }).populate(
       "recipeId",
       "title"
     );

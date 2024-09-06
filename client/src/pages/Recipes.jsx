@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { FaSearch, FaBookmark, FaStar } from "react-icons/fa";
-import { Link, useNavigate } from "react-router-dom"; // Import useNavigate
+import { Link, useNavigate } from "react-router-dom";
 import { useGetUserID } from "../hooks/useGetUserID";
 import { AiOutlineHeart, AiFillHeart } from "react-icons/ai";
 
@@ -14,7 +14,7 @@ export const Recipes = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const backendUrl = "http://localhost:3001";
   const userID = useGetUserID();
-  const navigate = useNavigate(); // Initialize navigate
+  const navigate = useNavigate();
 
   const formatCategoryName = (category) => {
     return category.toLowerCase().replace(/ & /g, "_").replace(/ /g, "_");
@@ -50,21 +50,7 @@ export const Recipes = () => {
         const response = await axios.get(
           `${backendUrl}/likes/likedrecipes/${userID}`
         );
-        setLikedRecipes(response.data);
-        // Update like counts
-        const counts = await Promise.all(
-          response.data.map(async (recipe) => {
-            const { data } = await axios.get(
-              `${backendUrl}/likes/countLikes/${recipe.recipeId}`
-            );
-            return { recipeId: recipe.recipeId, count: data.totalLikes };
-          })
-        );
-        const likeCountMap = counts.reduce((acc, { recipeId, count }) => {
-          acc[recipeId] = count;
-          return acc;
-        }, {});
-        setLikeCount(likeCountMap);
+        setLikedRecipes(response.data.map((recipe) => recipe.recipeId));
       } catch (err) {
         console.error("Error fetching liked recipes:", err);
         setError("Failed to fetch liked recipes.");
@@ -95,17 +81,23 @@ export const Recipes = () => {
   const toggleLike = async (recipeID) => {
     if (!userID) return;
     try {
-      const url = `${backendUrl}/likes/toggleLike`;
-      await axios.post(url, { likedBy: userID, recipeId: recipeID });
+      const url = `${backendUrl}/likes/addlike`;
+      await axios.post(url, {
+        likedBy: userID,
+        recipeOwner: userID, // Assuming the user who likes is also the recipe owner
+        recipeId: recipeID,
+      });
       // Update liked recipes and like count
-      const response = await axios.get(
-        `${backendUrl}/likes/likedrecipes/${userID}`
-      );
-      setLikedRecipes(response.data);
-      const { data } = await axios.get(
-        `${backendUrl}/likes/countLikes/${recipeID}`
-      );
-      setLikeCount((prev) => ({ ...prev, [recipeID]: data.totalLikes }));
+      const [likedResponse, countResponse] = await Promise.all([
+        axios.get(`${backendUrl}/likes/likedrecipes/${userID}`),
+        axios.get(`${backendUrl}/likes/countLikes/${recipeID}`),
+      ]);
+
+      setLikedRecipes(likedResponse.data.map((recipe) => recipe.recipeId));
+      setLikeCount((prev) => ({
+        ...prev,
+        [recipeID]: countResponse.data.totalLikes,
+      }));
     } catch (err) {
       console.error(
         "Error toggling like:",
@@ -115,9 +107,10 @@ export const Recipes = () => {
     }
   };
 
+  
+
   const isRecipeSaved = (id) => savedRecipes.includes(id);
-  const isRecipeLiked = (id) =>
-    likedRecipes.some((recipe) => recipe.recipeId === id);
+  const isRecipeLiked = (id) => likedRecipes.includes(id);
 
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);
@@ -156,6 +149,7 @@ export const Recipes = () => {
         />
         <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-lg" />
       </div>
+
       {/* Categories section */}
       <section className="mb-12">
         <div className="flex overflow-x-auto space-x-4 mx-8 px-4 justify-center">
@@ -177,7 +171,7 @@ export const Recipes = () => {
               <img
                 src={`/images/${formatCategoryName(category)}.jpg`}
                 alt={category}
-                className="w-24 h-24 object-cover rounded-full mb-2" // Adjusted size
+                className="w-24 h-24 object-cover rounded-full mb-2"
               />
               <p className="text-xs font-semibold text-center">{category}</p>
             </div>
@@ -185,11 +179,9 @@ export const Recipes = () => {
         </div>
       </section>
 
-
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
         {filteredRecipes.map((recipe) => {
           const userOwner = recipe.userOwner || {};
-          const count = likeCount[recipe._id] || 0;
           return (
             <div
               key={recipe._id}
@@ -243,33 +235,34 @@ export const Recipes = () => {
                       : "0.0"}
                   </span>
                 </div>
-                {/* Action Buttons */}
-                <div className="flex justify-between items-center p-4">
-                  <div className="flex space-x-4">
-                    <button
-                      className={`text-xl ${
-                        isRecipeLiked(recipe._id)
-                          ? "text-red-500"
-                          : "text-gray-700"
-                      }`}
-                      onClick={() => toggleLike(recipe._id)}
-                    >
-                      {isRecipeLiked(recipe._id) ? (
-                        <AiFillHeart />
-                      ) : (
-                        <AiOutlineHeart />
-                      )}
-                    </button>
-                    <span className="text-sm text-gray-500">{count} likes</span>
-                  </div>
-                  <div className="flex justify-center mb-4">
-                    <Link
-                      to={`/recipes/${recipe._id}`}
-                      className="text-blue-500 hover:text-blue-700 underline"
-                    >
-                      Review
-                    </Link>
-                  </div>
+
+                <div className="flex justify-center mb-4">
+                  <button
+                    onClick={() => toggleLike(recipe._id)}
+                    className={`text-2xl ${
+                      isRecipeLiked(recipe._id)
+                        ? "text-red-500"
+                        : "text-gray-500"
+                    }`}
+                  >
+                    {isRecipeLiked(recipe._id) ? (
+                      <AiFillHeart />
+                    ) : (
+                      <AiOutlineHeart />
+                    )}
+                  </button>
+                  <span className="ml-2 text-gray-600 text-sm">
+                    {likeCount[recipe._id] || 0}
+                  </span>
+                </div>
+
+                <div className="flex justify-center mb-4">
+                  <Link
+                    to={`/recipes/${recipe._id}`}
+                    className="text-blue-500 hover:text-blue-700 underline"
+                  >
+                    Review
+                  </Link>
                 </div>
               </div>
             </div>
