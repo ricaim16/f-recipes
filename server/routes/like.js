@@ -25,7 +25,6 @@ router.post("/addlike", async (req, res) => {
 
     if (alreadyLiked) {
       await LikeModel.deleteOne({ _id: alreadyLiked._id });
-      // Decrement likesCount
       await RecipesModel.findByIdAndUpdate(
         recipeId,
         { $inc: { likesCount: -1 } },
@@ -35,7 +34,6 @@ router.post("/addlike", async (req, res) => {
     } else {
       const newLike = new LikeModel({ likedBy, recipeOwner, recipeId });
       await newLike.save();
-      // Increment likesCount
       await RecipesModel.findByIdAndUpdate(
         recipeId,
         { $inc: { likesCount: 1 } },

@@ -46,13 +46,11 @@ router.post("/", upload.single("image"), verifyToken, async (req, res) => {
     instructions,
     cookingTime,
     userOwner,
+    createdBy, // Extract createdBy from the request
     categories,
   } = req.body;
 
   const imageUrl = req.file ? req.file.path : null;
-
-  // Log the received file information
-  console.log("Uploaded file info:", req.file);
 
   if (!imageUrl) {
     return res
@@ -67,13 +65,15 @@ router.post("/", upload.single("image"), verifyToken, async (req, res) => {
       ingredients: JSON.parse(ingredients),
       instructions,
       imageUrl,
-      cookingTime,
+      cookingTime: Number(cookingTime),
       userOwner,
+      createdBy, // Include createdBy
       categories: JSON.parse(categories), // Ensure this is correctly parsed
     });
 
     await newRecipe.save();
 
+    // Check and create categories if needed
     for (const category of JSON.parse(categories)) {
       const existingCategory = await CategoryModel.findOne({ name: category });
       if (!existingCategory) {
@@ -90,6 +90,7 @@ router.post("/", upload.single("image"), verifyToken, async (req, res) => {
       .json({ message: "Internal Server Error", error: error.message });
   }
 });
+
 
 // Get a recipe by ID
 router.get("/:recipeId", async (req, res) => {
@@ -215,6 +216,33 @@ router.get("/category/:categoryName", async (req, res) => {
   } catch (err) {
     console.error("Error fetching recipes by category:", err);
     res.status(500).json({ error: err.message });
+  }
+});
+
+router.get("/user/:userID", async (req, res) => {
+  try {
+    const user = await UserModel.findById(req.params.userID);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const userRecipes = await RecipesModel.find({ userOwner: user._id })
+      .populate("userOwner") // Only if needed
+      .sort({ createdAt: -1 });
+
+    if (userRecipes.length === 0) {
+      return res
+        .status(404)
+        .json({ message: "No recipes found for this user" });
+    }
+
+    res.status(200).json({ userRecipes });
+  } catch (err) {
+    console.error("Error fetching recipes posted by user:", err);
+    res.status(500).json({
+      error: "An error occurred while fetching recipes posted by the user",
+    });
   }
 });
 

@@ -5,6 +5,7 @@ import { userRouter } from "./routes/users.js";
 import { recipesRouter } from "./routes/recipes.js";
 import { categoryRouter } from "./routes/category.js"; // Import the router
 import { reviewRouter } from "./routes/review.js";
+import { likeRouter } from "./routes/like.js";
 
 const app = express();
 const port = 3001;
@@ -31,6 +32,7 @@ app.use("/auth", userRouter);
 app.use("/recipes", recipesRouter);
 app.use("/category", categoryRouter);
 app.use("/reviews", reviewRouter);
+app.use("/likes", likeRouter);
 
 // Start the server
 app.listen(port, () => {

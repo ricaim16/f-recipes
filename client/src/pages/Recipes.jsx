@@ -1,20 +1,29 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { FaSearch, FaBookmark, FaStar } from "react-icons/fa";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom"; // Import useNavigate
 import { useGetUserID } from "../hooks/useGetUserID";
+import { AiOutlineHeart, AiFillHeart } from "react-icons/ai";
 
 export const Recipes = () => {
   const [recipes, setRecipes] = useState([]);
   const [savedRecipes, setSavedRecipes] = useState([]);
+  const [likedRecipes, setLikedRecipes] = useState([]);
+  const [likeCount, setLikeCount] = useState({});
   const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const backendUrl = "http://localhost:3001";
   const userID = useGetUserID();
+  const navigate = useNavigate(); // Initialize navigate
+
+  const formatCategoryName = (category) => {
+    return category.toLowerCase().replace(/ & /g, "_").replace(/ /g, "_");
+  };
 
   useEffect(() => {
     const fetchRecipes = async () => {
       try {
-        const response = await axios.get("http://localhost:3001/recipes");
+        const response = await axios.get(`${backendUrl}/recipes`);
         setRecipes(response.data);
       } catch (err) {
         console.error("Error fetching recipes:", err);
@@ -26,27 +35,52 @@ export const Recipes = () => {
       if (!userID) return;
       try {
         const response = await axios.get(
-          `http://localhost:3001/recipes/savedRecipes/ids/${userID}`
+          `${backendUrl}/recipes/savedRecipes/ids/${userID}`
         );
         setSavedRecipes(response.data.savedRecipes || []);
       } catch (err) {
         console.error("Error fetching saved recipes:", err);
         setError("Failed to fetch saved recipes.");
-        setSavedRecipes([]);
+      }
+    };
+
+    const fetchLikedRecipes = async () => {
+      if (!userID) return;
+      try {
+        const response = await axios.get(
+          `${backendUrl}/likes/likedrecipes/${userID}`
+        );
+        setLikedRecipes(response.data);
+        // Update like counts
+        const counts = await Promise.all(
+          response.data.map(async (recipe) => {
+            const { data } = await axios.get(
+              `${backendUrl}/likes/countLikes/${recipe.recipeId}`
+            );
+            return { recipeId: recipe.recipeId, count: data.totalLikes };
+          })
+        );
+        const likeCountMap = counts.reduce((acc, { recipeId, count }) => {
+          acc[recipeId] = count;
+          return acc;
+        }, {});
+        setLikeCount(likeCountMap);
+      } catch (err) {
+        console.error("Error fetching liked recipes:", err);
+        setError("Failed to fetch liked recipes.");
       }
     };
 
     fetchRecipes();
     fetchSavedRecipes();
+    fetchLikedRecipes();
   }, [userID]);
 
   const toggleRecipe = async (recipeID) => {
     if (!userID) return;
     try {
       const isSaved = savedRecipes.includes(recipeID);
-      const url = `http://localhost:3001/recipes/${
-        isSaved ? "remove" : "save"
-      }`;
+      const url = `${backendUrl}/recipes/${isSaved ? "remove" : "save"}`;
       const response = await axios.put(url, { recipeID, userID });
       setSavedRecipes(response.data.savedRecipes || []);
     } catch (err) {
@@ -58,7 +92,32 @@ export const Recipes = () => {
     }
   };
 
+  const toggleLike = async (recipeID) => {
+    if (!userID) return;
+    try {
+      const url = `${backendUrl}/likes/toggleLike`;
+      await axios.post(url, { likedBy: userID, recipeId: recipeID });
+      // Update liked recipes and like count
+      const response = await axios.get(
+        `${backendUrl}/likes/likedrecipes/${userID}`
+      );
+      setLikedRecipes(response.data);
+      const { data } = await axios.get(
+        `${backendUrl}/likes/countLikes/${recipeID}`
+      );
+      setLikeCount((prev) => ({ ...prev, [recipeID]: data.totalLikes }));
+    } catch (err) {
+      console.error(
+        "Error toggling like:",
+        err.response ? err.response.data : err.message
+      );
+      setError("Failed to toggle like.");
+    }
+  };
+
   const isRecipeSaved = (id) => savedRecipes.includes(id);
+  const isRecipeLiked = (id) =>
+    likedRecipes.some((recipe) => recipe.recipeId === id);
 
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);
@@ -97,10 +156,40 @@ export const Recipes = () => {
         />
         <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-lg" />
       </div>
+      {/* Categories section */}
+      <section className="mb-12">
+        <div className="flex overflow-x-auto space-x-4 mx-8 px-4 justify-center">
+          {[
+            "Dinner",
+            "Lunch",
+            "Desserts",
+            "Breakfast",
+            "Drink",
+            "Snacks",
+            "Fasting",
+            "Vegetable",
+          ].map((category) => (
+            <div
+              key={category}
+              className="flex-shrink-0 flex flex-col items-center cursor-pointer p-2 mx-2"
+              onClick={() => navigate(`/recipes/category/${category}`)}
+            >
+              <img
+                src={`/images/${formatCategoryName(category)}.jpg`}
+                alt={category}
+                className="w-24 h-24 object-cover rounded-full mb-2" // Adjusted size
+              />
+              <p className="text-xs font-semibold text-center">{category}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
         {filteredRecipes.map((recipe) => {
           const userOwner = recipe.userOwner || {};
+          const count = likeCount[recipe._id] || 0;
           return (
             <div
               key={recipe._id}
@@ -154,13 +243,33 @@ export const Recipes = () => {
                       : "0.0"}
                   </span>
                 </div>
-                <div className="flex justify-center mb-4">
-                  <Link
-                    to={`/recipes/${recipe._id}`}
-                    className="text-blue-500 hover:text-blue-700 underline"
-                  >
-                    Review
-                  </Link>
+                {/* Action Buttons */}
+                <div className="flex justify-between items-center p-4">
+                  <div className="flex space-x-4">
+                    <button
+                      className={`text-xl ${
+                        isRecipeLiked(recipe._id)
+                          ? "text-red-500"
+                          : "text-gray-700"
+                      }`}
+                      onClick={() => toggleLike(recipe._id)}
+                    >
+                      {isRecipeLiked(recipe._id) ? (
+                        <AiFillHeart />
+                      ) : (
+                        <AiOutlineHeart />
+                      )}
+                    </button>
+                    <span className="text-sm text-gray-500">{count} likes</span>
+                  </div>
+                  <div className="flex justify-center mb-4">
+                    <Link
+                      to={`/recipes/${recipe._id}`}
+                      className="text-blue-500 hover:text-blue-700 underline"
+                    >
+                      Review
+                    </Link>
+                  </div>
                 </div>
               </div>
             </div>

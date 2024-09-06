@@ -42,7 +42,21 @@ const recipeSchema = mongoose.Schema(
       },
     ],
     averageRating: { type: Number, default: 0 },
-    likesCount: { type: Number, default: 0 }, // Field for tracking the total likes count
+    likes: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Users",
+      },
+    ],
+    postedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Users",
+    },
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Users",
+      required: true,
+    },
   },
   { timestamps: true }
 );

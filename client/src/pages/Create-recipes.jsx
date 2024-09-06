@@ -83,18 +83,16 @@ const handleSubmit = async (event) => {
   setLoading(true);
   setError(null);
 
-  // Log the categories being sent
-  console.log("Categories being sent:", JSON.stringify(recipe.categories));
-
   try {
     const formData = new FormData();
     formData.append("name", recipe.name);
     formData.append("description", recipe.description);
     formData.append("ingredients", JSON.stringify(recipe.ingredients));
     formData.append("instructions", recipe.instructions);
-    formData.append("cookingTime", recipe.cookingTime);
-    formData.append("userOwner", recipe.userOwner);
-    formData.append("categories", JSON.stringify(recipe.categories)); // Ensure this is correct
+    formData.append("cookingTime", recipe.cookingTime.toString()); // Ensure it's a string
+    formData.append("userOwner", recipe.userOwner); // Include userOwner
+    formData.append("createdBy", recipe.userOwner); // Include createdBy
+    formData.append("categories", JSON.stringify(recipe.categories));
     formData.append("image", imageFile);
 
     await axios.post("http://localhost:3001/recipes", formData, {
