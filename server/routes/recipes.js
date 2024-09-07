@@ -38,7 +38,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
-router.post('/like', async (req, res) => {
+router.post('/liked', async (req, res) => {
   const { userId, postId } = req.body; // assuming userId is sent in the request body
 
   try {
@@ -170,6 +170,47 @@ router.put("/save", async (req, res) => {
   }
 });
 
+router.put("/toggleLike", async (req, res) => {
+  const { recipeID, userID } = req.body;
+
+  if (
+    !mongoose.Types.ObjectId.isValid(recipeID) ||
+    !mongoose.Types.ObjectId.isValid(userID)
+  ) {
+    return res.status(400).json({ message: "Invalid recipe ID or user ID" });
+  }
+
+  try {
+    const recipe = await RecipesModel.findById(recipeID);
+    const user = await UserModel.findById(userID);
+    console.log("outside the function " + recipe.likesCount);
+
+    if (!recipe || !user) {
+      return res.status(404).json({ message: "User or recipe not found" });
+    }
+
+    if (!user.likedRecipes.includes(recipeID)) {
+
+      recipe.likesCount += 1;
+      user.likedRecipes.push(recipeID);
+
+      await user.save();
+      await recipe.save();
+    } else {
+      recipe.likesCount -= 1;
+      user.likedRecipes.pull(recipeID);
+
+      await user.save();
+      await recipe.save();
+    }
+
+    res.status(201).json({ likedRecipes: user.likedRecipes });
+  } catch (err) {
+    console.error("Error saving recipe:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Remove a Recipe
 router.put("/remove", async (req, res) => {
   const { recipeID, userID } = req.body;
@@ -205,6 +246,15 @@ router.get("/savedRecipes/ids/:userID", async (req, res) => {
   try {
     const user = await UserModel.findById(req.params.userID);
     res.json({ savedRecipes: user?.savedRecipes });
+  } catch (err) {
+    console.error("Error fetching saved recipes:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+router.get("/liked/ids/:userID", async (req, res) => {
+  try {
+    const user = await UserModel.findById(req.params.userID);
+    res.json({ likedRecipes: user?.likedRecipes });
   } catch (err) {
     console.error("Error fetching saved recipes:", err);
     res.status(500).json({ error: err.message });

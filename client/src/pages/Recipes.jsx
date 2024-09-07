@@ -8,6 +8,7 @@ import { AiOutlineHeart, AiFillHeart } from "react-icons/ai";
 export const Recipes = () => {
 	const [recipes, setRecipes] = useState([]);
 	const [savedRecipes, setSavedRecipes] = useState([]);
+	const [likedRecipes, setLikedRecipe] = useState([]);
 	const [error, setError] = useState(null);
 	const [searchQuery, setSearchQuery] = useState("");
 	const backendUrl = "http://localhost:3001";
@@ -30,6 +31,13 @@ export const Recipes = () => {
 					);
 					setSavedRecipes(savedResponse.data.savedRecipes || []);
 				}
+				if (userID) {
+					const likedResponse = await axios.get(
+						`${backendUrl}/recipes/liked/ids/${userID}`
+          );
+          
+					setLikedRecipe(likedResponse.data.likedRecipes || []);
+				}
 			} catch (err) {
 				console.error("Error fetching data:", err);
 				setError("Failed to fetch data.");
@@ -37,7 +45,7 @@ export const Recipes = () => {
 		};
 
 		fetchData();
-	}, [userID]);
+	}, [likedRecipes]);
 
 	const toggleRecipe = async (recipeID) => {
 		if (!userID) return;
@@ -54,8 +62,28 @@ export const Recipes = () => {
 			setError("Failed to toggle recipe.");
 		}
 	};
+	const save = async (recipeID) => {
+		if (!userID) return;
+		try {
+      // const isSaved = savedRecipes.includes(recipeID);
+      // console.log(isSaved);
+      
+			// const url = `${backendUrl}/recipes/${isSaved ? "unlike" : "like"}`;
+			const url = `${backendUrl}/recipes/toggleLike`;
+			const response = await axios.put(url, { recipeID, userID });
+			setLikedRecipe(response.data.likedRecipe || []);
+		} catch (err) {
+			console.error(
+				"Error toggling recipe:",
+				err.response ? err.response.data : err.message
+			);
+			setError("Failed to toggle recipe.");
+		}
+	};
 
 	const isRecipeSaved = (id) => savedRecipes.includes(id);
+	const isRecipeLiked = (id) => likedRecipes.includes(id);
+
 
 	const handleSearchChange = (e) => {
 		setSearchQuery(e.target.value);
@@ -181,8 +209,8 @@ export const Recipes = () => {
 								</div>
 
 								<div className="flex justify-center mb-4">
-									{/* <button
-										onClick={() => toggleLike(recipe._id)}
+									<button
+										onClick={() => save(recipe._id)}
 										className={`text-2xl ${
 											isRecipeLiked(recipe._id)
 												? "text-red-500"
@@ -194,7 +222,7 @@ export const Recipes = () => {
 										) : (
 											<AiOutlineHeart />
 										)}
-									</button> */}
+									</button>
 									<span className="ml-2 text-gray-600 text-sm">
 										{recipe.likesCount}
 									</span>

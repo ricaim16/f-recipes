@@ -8,6 +8,7 @@ const UserSchema = new mongoose.Schema({
   profileImage: { type: String, default: "" }, // URL or path to the profile image
   bio: { type: String, default: "" }, // Default empty bio
   savedRecipes: [{ type: mongoose.Schema.Types.ObjectId, ref: "Recipe" }], // Ensure "Recipe" matches the model name
+  likedRecipes: [{ type: mongoose.Schema.Types.ObjectId, ref: "Recipe" }], // Ensure "Recipe" matches the model name
 });
 
 // Create a User model from the schema
