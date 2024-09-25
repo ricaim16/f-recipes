@@ -6,12 +6,14 @@ Getting Started
 Prerequisites
 Make sure you have the following installed on your machine:
 
+
 Node.js
 
 npm (Node Package Manager)
 
 Installation
 Clone the repository:
+
 
 bash
 Copy code
@@ -20,6 +22,8 @@ git clone [your-repo-url]
 
 cd f-recipes
 Set up the client side:
+
+
 
 bash
 Copy code
@@ -32,6 +36,7 @@ After running this command, you should see:
 sql
 Copy code
 
+
 VITE v5.4.2 ready in [time] ms
 
 ➜  Local:   http://localhost:5173/
@@ -42,6 +47,7 @@ VITE v5.4.2 ready in [time] ms
 
 Set up the server side:
 
+
 bash
 Copy code
 cd ../server
@@ -49,6 +55,7 @@ cd ../server
 npm install
 npm start
 You should see:
+
 
 arduino
 Copy code
