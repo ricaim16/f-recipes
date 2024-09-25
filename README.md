@@ -1,5 +1,5 @@
-Food Recipes Project
-Welcome to my Food Recipes Project! This is my first full-stack application built using the MERN stack. Below are the instructions to set up and run the project.
+#*Food Recipes Project*
+###*Welcome to my Food Recipes Project! This is my first full-stack application built using the MERN stack. Below are the instructions to set up and run the project.*
 
 Getting Started
 Prerequisites
