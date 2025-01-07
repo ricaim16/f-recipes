@@ -13,16 +13,19 @@ const RecipesList = () => {
   const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const userID = useGetUserID();
-  const backendUrl = "http://localhost:3001"; // Make sure to define your backend URL
+  const backendUrl = "http://localhost:3001"; // Define your backend URL
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
-  const recipesPerPage = 6; // Adjust this value as needed
+  const recipesPerPage = 6;
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const recipesResponse = await axios.get(`${backendUrl}/recipes`);
+        // Fetch recipes by category
+        const recipesResponse = await axios.get(
+          `${backendUrl}/recipes/category/${categoryName}`
+        );
         setRecipes(recipesResponse.data);
 
         if (userID) {
@@ -43,7 +46,7 @@ const RecipesList = () => {
     };
 
     fetchData();
-  }, [userID]);
+  }, [userID, categoryName]);
 
   const toggleRecipe = async (recipeID) => {
     if (!userID) return;
@@ -54,10 +57,7 @@ const RecipesList = () => {
       const response = await axios.put(url, { recipeID, userID });
       setSavedRecipes(response.data.savedRecipes || []);
     } catch (err) {
-      console.error(
-        "Error toggling recipe:",
-        err.response ? err.response.data : err.message
-      );
+      console.error("Error toggling recipe:", err);
       setError("Failed to toggle recipe.");
     }
   };
@@ -70,10 +70,7 @@ const RecipesList = () => {
       const response = await axios.put(url, { recipeID, userID });
       setLikedRecipes(response.data.likedRecipes || []);
     } catch (err) {
-      console.error(
-        "Error toggling recipe:",
-        err.response ? err.response.data : err.message
-      );
+      console.error("Error toggling recipe:", err);
       setError("Failed to toggle recipe.");
     }
   };
@@ -89,15 +86,13 @@ const RecipesList = () => {
     recipe.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  // Calculate current recipes based on pagination
+  // Pagination logic
   const indexOfLastRecipe = currentPage * recipesPerPage;
   const indexOfFirstRecipe = indexOfLastRecipe - recipesPerPage;
   const currentRecipes = filteredRecipes.slice(
     indexOfFirstRecipe,
     indexOfLastRecipe
   );
-
-  // Calculate total pages
   const totalPages = Math.ceil(filteredRecipes.length / recipesPerPage);
 
   return (
@@ -116,6 +111,8 @@ const RecipesList = () => {
         />
         <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-lg" />
       </div>
+
+      {error && <div className="text-red-500 text-center mb-4">{error}</div>}
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
         {currentRecipes.map((recipe) => (
@@ -202,7 +199,7 @@ const RecipesList = () => {
               <div className="flex justify-center mb-4">
                 <Link
                   to={`/recipes/${recipe._id}`}
-                  style={{ color: "#C65D3D" }} // Dark orange color
+                  style={{ color: "#C65D3D" }}
                   className="hover:text-orange-700 underline"
                 >
                   Review

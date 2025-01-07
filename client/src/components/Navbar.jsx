@@ -17,6 +17,7 @@ export const Navbar = () => {
   const [userProfile, setUserProfile] = useState(null);
   const [profilePicture, setProfilePicture] = useState(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [recipes, setRecipes] = useState([]); // State to hold recipes of the selected category
   const navigate = useNavigate();
   const token = cookies.access_token;
   const userID = useGetUserID();
@@ -70,6 +71,27 @@ export const Navbar = () => {
     }
   }, [token, userID, navigate, setCookies]);
 
+  const fetchRecipesByCategory = async (categoryName) => {
+    try {
+      const response = await axios.get(
+        `http://localhost:3001/recipes/category/${categoryName}`, // Adjust this endpoint as needed
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      setRecipes(response.data); // Set the fetched recipes to state
+      navigate(`/recipes/category/${categoryName}`); // Navigate to the recipes page
+    } catch (error) {
+      console.error("Error fetching recipes:", error);
+    }
+  };
+
+  const handleMealCategoryClick = (category) => {
+    fetchRecipesByCategory(category); // Fetch recipes when a category is clicked
+  };
+
   const handleProfilePictureUpload = async (event) => {
     const file = event.target.files[0];
     if (file) {
@@ -109,10 +131,6 @@ export const Navbar = () => {
     setActiveMeal(mealType);
   };
 
-  const handleMealCategoryClick = (category) => {
-    navigate(`/recipes/category/${category}`);
-  };
-
   const handleViewMoreClick = () => {
     setShowAllCategories(true);
   };
@@ -138,7 +156,7 @@ export const Navbar = () => {
       {/* Black Bar with Yegna Mgb Text */}
       <div className="bg-black text-white w-screen absolute top-0 left-0 right-0 z-10">
         <div className="text-center text-orange-400 py-6 text-2xl font-bold text-gray-200">
-            Ethiopian Food Recipes
+          Ethiopian Food Recipes
         </div>
       </div>
 
@@ -147,12 +165,9 @@ export const Navbar = () => {
         <div className="container mx-auto flex flex-wrap items-center justify-between p-4">
           <div className="flex-shrink-0">
             <Link to="/">
-              <span
-                className="text-3xl italic font-bold text-orange-600 "
-                
-              >
-                 Gebeta
-              </span>{" "}
+              <span className="text-3xl italic font-bold text-orange-600">
+                Gebeta
+              </span>
             </Link>
           </div>
 
@@ -429,7 +444,7 @@ export const Navbar = () => {
 
                     <Link
                       to="/create-recipes"
-                      className="font-bold text-orange-500  flex items-center space-x-2 px-4 py-2 rounded hover:bg-gray-200"
+                      className="font-bold text-orange-500 flex items-center space-x-2 px-4 py-2 rounded hover:bg-gray-200"
                     >
                       <span>+Add Recipes</span>
                     </Link>
