@@ -1,7 +1,7 @@
 import "./App.css";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import { Recipes } from "./pages/Recipes";
-import { Auth } from "./pages/Auth";
+import { Auth } from "./pages/Auth"; // Assuming this is your login page
 import { CreateRecipes } from "./pages/Create-recipes";
 import { Navbar } from "./components/Navbar";
 import { Home } from "./pages/Home";
@@ -21,7 +21,10 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/recipes" element={<Recipes />} />
           <Route path="/ingredients" element={<Ingredients />} />
-          <Route path="/auth" element={<Auth />} />
+          <Route path="/auth" element={<Auth />} />{" "}
+          {/* This is your login route */}
+          <Route path="/login" element={<Auth />} />{" "}
+          {/* Redirected to /login */}
           <Route path="/saved-recipes" element={<SavedRecipes />} />
           <Route path="/create-recipes" element={<CreateRecipes />} />
           <Route path="/recipes/:id" element={<RecipeDetails />} />
@@ -30,8 +33,7 @@ function App() {
           <Route
             path="/recipes/category/:categoryName"
             element={<RecipesList />}
-          />{" "}
-          {/* New route */}
+          />
         </Routes>
       </Router>
     </div>

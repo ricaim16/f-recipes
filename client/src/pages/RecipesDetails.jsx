@@ -5,6 +5,8 @@ import { FaStar } from "react-icons/fa";
 import format from "date-fns/format";
 import { useUserID } from "../hooks/useUserID";
 
+const backendUrl = "http://localhost:3001";
+
 const RecipeDetails = () => {
   const { id } = useParams();
   const { user } = useUserID();
@@ -13,43 +15,30 @@ const RecipeDetails = () => {
   const [newReview, setNewReview] = useState({ comment: "", rating: 5 });
   const [errorMessage, setErrorMessage] = useState("");
   const [loading, setLoading] = useState(true);
-  const backendUrl = "http://localhost:3001";
 
   useEffect(() => {
-  const fetchRecipe = async () => {
-    try {
-      const response = await axios.get(`${backendUrl}/recipes/${id}`);
-      let ingredients = response.data.ingredients;
+    const fetchRecipe = async () => {
+      try {
+        const response = await axios.get(`${backendUrl}/recipes/${id}`);
+        const ingredients =
+          Array.isArray(response.data.ingredients) ||
+          typeof response.data.ingredients === "string"
+            ? response.data.ingredients
+            : [response.data.ingredients];
 
-      // Check if ingredients is an array with a single string element
-      if (
-        Array.isArray(ingredients) &&
-        ingredients.length === 1 &&
-        typeof ingredients[0] === "string"
-      ) {
-        try {
-          // Attempt to parse the string to an array
-          ingredients = JSON.parse(ingredients[0]);
-        } catch (parseError) {
-          console.error("Failed to parse ingredients JSON:", parseError);
-          ingredients = []; // Default to empty array if parsing fails
-          setErrorMessage("Failed to parse ingredients data.");
-        }
+        setRecipe({ ...response.data, ingredients });
+      } catch (error) {
+        console.error("Failed to fetch recipe:", error);
+        setErrorMessage("Failed to load recipe details.");
       }
-
-      console.log(ingredients); // Check the type and contents
-      setRecipe({ ...response.data, ingredients });
-    } catch (error) {
-      console.error("Failed to fetch recipe:", error);
-      setErrorMessage("Failed to load recipe details.");
-    }
-  };
+    };
 
     const fetchReviews = async () => {
       try {
         const response = await axios.get(
           `${backendUrl}/reviews/getallreviews/${id}`
         );
+        console.log("Fetched Reviews Data:", response.data); // Debugging log
         setReviews(response.data);
       } catch (error) {
         console.error("Failed to fetch reviews:", error);
@@ -113,10 +102,13 @@ const RecipeDetails = () => {
   };
 
   const formatDate = (dateStr) => {
+    if (!dateStr) return "Date not available";
     const date = new Date(dateStr);
-    return isNaN(date.getTime())
-      ? "Invalid Date"
-      : format(date, "MMM d, yyyy h:mm a");
+    if (isNaN(date.getTime())) {
+      console.error("Invalid date format:", dateStr);
+      return "Invalid Date";
+    }
+    return format(date, "MMM d, yyyy h:mm a");
   };
 
   if (loading) {
@@ -133,16 +125,24 @@ const RecipeDetails = () => {
         <div className="max-w-3xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden">
           <div className="relative">
             <img
-              src={`http://localhost:3001/${recipe.imageUrl}`}
+              src={
+                recipe.imageUrl
+                  ? `${backendUrl}/${recipe.imageUrl}`
+                  : "/default-image.jpg"
+              }
               alt={recipe.name}
               className="w-full h-56 object-cover mb-4"
             />
           </div>
           <div className="p-6">
-            <h2 className="text-2xl font-semibold mb-2">{recipe.name}</h2>
+            <h2 className="text-2xl text-orange-500 font-semibold mb-2">
+              {recipe.name}
+            </h2>
             <p className="text-gray-700 text-base mb-4">{recipe.description}</p>
 
-            <h3 className="text-xl font-medium mb-3">Ingredients</h3>
+            <h3 className="text-xl text-orange-500 font-medium mb-3">
+              Ingredients
+            </h3>
             <ul className="list-disc pl-6 text-gray-700 text-base mb-4 list-inside">
               {recipe.ingredients && recipe.ingredients.length > 0 ? (
                 recipe.ingredients.map((ingredient, index) => (
@@ -155,64 +155,76 @@ const RecipeDetails = () => {
               )}
             </ul>
 
-            <h3 className="text-xl font-medium mb-3">Instructions</h3>
+            <h3 className="text-xl text-orange-500 font-medium mb-3">
+              Instructions
+            </h3>
             <p className="text-gray-700 text-base mb-5">
               {renderInstructions()}
             </p>
             <div className="flex justify-between items-center mb-6">
-              <p className="text-gray-700 text-base">
+              <p className="text-gray-700  text-base">
                 Cooking Time: {recipe.cookingTime} minutes
               </p>
             </div>
           </div>
 
           <div className="mt-12">
-            <h2 className="text-2xl font-semibold text-gray-800 mb-6">
+            <h2 className="text-2xl text-orange-500 font-semibold text-gray-800 mb-6">
               Reviews
             </h2>
             <div className="space-y-4">
               {reviews.length > 0 ? (
-                reviews.map((review) => (
-                  <div
-                    key={review._id}
-                    className="p-4 bg-gray-200 rounded-lg shadow-md flex items-start space-x-4"
-                  >
-                    <div className="flex-shrink-0">
-                      <img
-                        src={
-                          review.userId?.profileImage
-                            ? `${backendUrl}${review.userId.profileImage}`
-                            : "/default-profile.png"
-                        }
-                        alt={review.userId?.name || "Anonymous"}
-                        className="w-12 h-12 object-cover rounded-full border border-gray-300"
-                      />
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex justify-between items-center mb-2">
-                        <span className="font-semibold text-gray-800">
-                          {review.userId?.name || "Anonymous"}
-                        </span>
-                        <div className="flex items-center text-yellow-500">
-                          {[...Array(5)].map((_, index) => (
-                            <FaStar
-                              key={index}
-                              className={`text-xl ${
-                                index < review.rating
-                                  ? "text-yellow-500"
-                                  : "text-gray-300"
-                              }`}
-                            />
-                          ))}
-                        </div>
+                reviews.map((review) => {
+                  const profileImageUrl = review.userId?.profileImage
+                    ? `${backendUrl}/${review.userId.profileImage}`
+                    : "/default-profile.png"; // Default profile image path
+
+                  return (
+                    <div
+                      key={review._id}
+                      className="p-4 bg-gray-200 rounded-lg shadow-md flex items-start space-x-4"
+                    >
+                      <div
+                        className="flex-shrink-0"
+                        style={{ width: "48px", height: "48px" }}
+                      >
+                        <img
+                          src={profileImageUrl}
+                          alt={review.userId?.name || "Anonymous"}
+                          className="w-full h-full object-cover rounded-full border border-gray-300"
+                          onError={(e) => {
+                            e.target.onerror = null; // Prevent infinite loop
+                            e.target.src = "/default-profile.png"; // Fallback to default image
+                          }}
+                        />
                       </div>
-                      <p className="text-gray-700">{review.comment}</p>
-                      <span className="text-xs text-gray-500 block mt-2">
-                        {formatDate(review.createdAt)}
-                      </span>
+                      <div className="flex-1">
+                        <div className="flex justify-between items-center mb-2">
+                          <span className="font-semibold text-gray-800">
+                            {review.userId?.name || "Anonymous"}
+                          </span>
+                          <div className="flex items-center text-yellow-500">
+                            {[...Array(5)].map((_, index) => (
+                              <FaStar
+                                key={index}
+                                className={`text-xl ${
+                                  index < review.rating
+                                    ? "text-yellow-500"
+                                    : "text-gray-300"
+                                }`}
+                              />
+                            ))}
+                          </div>
+                        </div>
+                        <p className="text-gray-700">{review.comment}</p>
+                        <span className="text-xs text-gray-500 block mt-2">
+                          {formatDate(review.createdAt)}{" "}
+                          {/* Ensure this has a valid date */}
+                        </span>
+                      </div>
                     </div>
-                  </div>
-                ))
+                  );
+                })
               ) : (
                 <p className="text-gray-600">
                   No reviews yet. Be the first to share your thoughts!
@@ -259,13 +271,13 @@ const RecipeDetails = () => {
                 )}
                 <button
                   type="submit"
-                  className="py-2 px-4 text-white bg-indigo-600 rounded-lg shadow-md hover:bg-indigo-700 transition duration-200"
+                  className="py-2 px-4 text-white bg-orange-600 rounded-lg shadow-md hover:bg-orange-700 transition duration-200"
                 >
                   Submit Review
                 </button>
               </form>
             ) : (
-              <p className="text-gray-600">Please log in to add a review.</p>
+              <p className=" text-orange-600">Please log in to add a review.</p>
             )}
           </div>
         </div>

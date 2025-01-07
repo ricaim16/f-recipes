@@ -11,6 +11,10 @@ export const SavedRecipes = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const userID = useGetUserID();
 
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const recipesPerPage = 6; // Adjust this value as needed
+
   useEffect(() => {
     const fetchSavedRecipes = async () => {
       try {
@@ -55,9 +59,22 @@ export const SavedRecipes = () => {
     return stars;
   };
 
+  // Calculate current recipes based on pagination
+  const indexOfLastRecipe = currentPage * recipesPerPage;
+  const indexOfFirstRecipe = indexOfLastRecipe - recipesPerPage;
+  const currentRecipes = filteredRecipes.slice(
+    indexOfFirstRecipe,
+    indexOfLastRecipe
+  );
+
+  // Calculate total pages
+  const totalPages = Math.ceil(filteredRecipes.length / recipesPerPage);
+
   return (
     <div className="p-6 mx-auto">
-      <h1 className="text-4xl font-bold mb-8 text-center">Saved Recipes</h1>
+      <h1 className="text-4xl font-bold mb-8 text-center text-orange-600">
+        Saved Recipes
+      </h1>
       {error && <p className="text-red-500 text-center mb-4">{error}</p>}
 
       <div className="mb-8 relative w-1/2 mx-auto">
@@ -66,13 +83,13 @@ export const SavedRecipes = () => {
           placeholder="Search recipes..."
           value={searchQuery}
           onChange={handleSearchChange}
-          className="w-full px-4 py-2 pl-10 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+          className="w-full px-4 py-2 pl-10 border border-orange-500 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-700 bg-orange-100 text-sm transition-colors duration-200 hover:bg-orange-200"
         />
         <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-lg" />
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
-        {filteredRecipes.map((recipe) => {
+        {currentRecipes.map((recipe) => {
           const userOwnerData = recipe.userOwner || {};
 
           return (
@@ -95,7 +112,7 @@ export const SavedRecipes = () => {
                       </div>
                     )}
                   </div>
-                  <div className="text-lg font-semibold">
+                  <div className="text-lg font-semibold text-orange-600">
                     {userOwnerData.name || "Unknown User"}
                   </div>
                 </div>
@@ -109,7 +126,6 @@ export const SavedRecipes = () => {
                 <p className="text-gray-700 text-left text-base my-2">
                   Cooking Time: {recipe.cookingTime} minutes
                 </p>
-                
 
                 <div className="flex items-center mb-4">
                   {renderStars(recipe.averageRating)}
@@ -119,18 +135,42 @@ export const SavedRecipes = () => {
                       : "0.0"}
                   </span>
                 </div>
-                <div className="flex justify-center mb-4">
-                  <Link
-                    to={`/recipes/${recipe._id}`}
-                    className="text-blue-500 hover:text-blue-700 underline"
-                  >
-                    Review
-                  </Link>
-                </div>
-              </div>
-            </div>
+               <div className="flex justify-center mb-4">
+                               <Link
+                                 to={`/recipes/${recipe._id}`}
+                                 style={{ color: "#C65D3D" }} // Dark orange color
+                                 className="hover:text-orange-700 underline"
+                               >
+                                 Review
+                               </Link>
+                             </div>
+                           </div>
+                         </div>
           );
         })}
+      </div>
+
+      {/* Pagination Controls */}
+      <div className="flex justify-center mt-8">
+        <button
+          onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+          className="mx-2 px-4 py-2 bg-orange-500 text-white rounded"
+          disabled={currentPage === 1}
+        >
+          Previous
+        </button>
+        <span className="mx-2 text-lg font-semibold">
+          Page {currentPage} of {totalPages}
+        </span>
+        <button
+          onClick={() =>
+            setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+          }
+          className="mx-2 px-4 py-2 bg-orange-500 text-white rounded"
+          disabled={currentPage === totalPages}
+        >
+          Next
+        </button>
       </div>
     </div>
   );

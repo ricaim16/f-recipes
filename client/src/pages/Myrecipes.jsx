@@ -2,14 +2,17 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCookies } from "react-cookie";
 import axios from "axios";
-import { useGetUserID } from "../hooks/useGetUserID"; // Assuming this is a custom hook you have
-import { FaSearch } from "react-icons/fa"; // If you're using this in your component
-import { Link } from "react-router-dom"; // If you're using Link in your component
+import { useGetUserID } from "../hooks/useGetUserID";
+import { FaSearch, FaEllipsisV } from "react-icons/fa";
 
 const MyRecipes = () => {
   const [recipes, setRecipes] = useState([]);
   const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [viewRecipeId, setViewRecipeId] = useState(null);
+  const [showOptions, setShowOptions] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(3); // Number of recipes per page
   const navigate = useNavigate();
   const backendUrl = "http://localhost:3001";
   const [cookies] = useCookies(["access_token"]);
@@ -20,19 +23,15 @@ const MyRecipes = () => {
     const fetchRecipes = async () => {
       if (userID && token) {
         const url = `${backendUrl}/recipes/user/${userID}`;
-        console.log("Requesting URL:", url);
-
         try {
           const response = await axios.get(url, {
             headers: {
               Authorization: `Bearer ${token}`,
             },
           });
-          console.log("Response data:", response.data);
           setRecipes(response.data.userRecipes || []);
         } catch (error) {
           setError("Error fetching recipes. Please try again later.");
-          console.error("Error fetching recipes:", error.message);
         }
       } else {
         setError("User not authenticated.");
@@ -49,10 +48,9 @@ const MyRecipes = () => {
           Authorization: `Bearer ${token}`,
         },
       });
-      setRecipes(recipes.filter(recipe => recipe._id !== recipeID));
+      setRecipes(recipes.filter((recipe) => recipe._id !== recipeID));
     } catch (error) {
       setError("Error deleting recipe. Please try again later.");
-      console.error("Error deleting recipe:", error.message);
     }
   };
 
@@ -60,7 +58,6 @@ const MyRecipes = () => {
     navigate(`/edit-recipe/${recipeID}`);
   };
 
-  // Filter recipes based on searchQuery
   const filteredRecipes = recipes.filter((recipe) =>
     recipe.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -69,8 +66,12 @@ const MyRecipes = () => {
     setSearchQuery(event.target.value);
   };
 
-  const handleRecipeClick = (recipeId) => {
-    navigate(`/recipe/${recipeId}`);
+  const handleViewRecipe = (recipeId) => {
+    setViewRecipeId(viewRecipeId === recipeId ? null : recipeId);
+  };
+
+  const toggleOptions = (recipeId) => {
+    setShowOptions(showOptions === recipeId ? null : recipeId);
   };
 
   const renderStars = (rating) => {
@@ -96,31 +97,40 @@ const MyRecipes = () => {
   };
 
   const renderInstructions = (instructions) => {
-    if (!instructions) {
-      return "No instructions available.";
-    }
-    return instructions;
+    return instructions || "No instructions available.";
   };
+
+  // Pagination Logic
+  const indexOfLastRecipe = currentPage * itemsPerPage;
+  const indexOfFirstRecipe = indexOfLastRecipe - itemsPerPage;
+  const currentRecipes = filteredRecipes.slice(
+    indexOfFirstRecipe,
+    indexOfLastRecipe
+  );
+  const totalPages = Math.ceil(filteredRecipes.length / itemsPerPage);
 
   return (
     <div className="p-6 mx-auto">
-      <h1 className="text-4xl font-bold mb-8 text-center">My Recipes</h1>
+      <h1 className="text-4xl font-bold mb-8 text-center text-orange-500">
+        My Recipes
+      </h1>
       {error && <p className="text-red-500 text-center mb-4">{error}</p>}
-
       <div className="mb-4 flex justify-center">
-        <input
-          type="text"
-          value={searchQuery}
-          onChange={handleSearchChange}
-          placeholder="Search recipes..."
-          className="p-2 border border-gray-300 rounded"
-        />
-        <FaSearch className="ml-2 text-gray-500" />
+        <div className="relative">
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={handleSearchChange}
+            placeholder="Search recipes..."
+            className="p-2 border border-orange-500 rounded w-64 pl-10 bg-orange-100 transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-orange-500 hover:border-orange-600"
+          />
+          <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
+        </div>
       </div>
-
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
-        {filteredRecipes.map((recipe) => {
+        {currentRecipes.map((recipe) => {
           const userOwnerData = recipe.userOwner || {};
+          const isViewing = viewRecipeId === recipe._id;
 
           return (
             <div
@@ -145,6 +155,28 @@ const MyRecipes = () => {
                   <div className="text-lg font-semibold">
                     {userOwnerData.name || "Unknown User"}
                   </div>
+                  <div className="ml-auto relative">
+                    <FaEllipsisV
+                      className="cursor-pointer text-orange-500"
+                      onClick={() => toggleOptions(recipe._id)}
+                    />
+                    {showOptions === recipe._id && (
+                      <div className="absolute right-0 mt-1 bg-white border border-gray-300 rounded shadow-lg z-10">
+                        <button
+                          onClick={() => handleEdit(recipe._id)}
+                          className="block px-4 py-2 text-left hover:bg-gray-100 w-full"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleDelete(recipe._id)}
+                          className="block px-4 py-2 text-left hover:bg-gray-100 w-full"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </div>
                 <img
                   src={`${backendUrl}/${recipe.imageUrl}`}
@@ -156,49 +188,74 @@ const MyRecipes = () => {
                   Cooking Time: {recipe.cookingTime} minutes
                 </p>
 
-                <p className="text-gray-700 text-base mb-4">
-                  {recipe.description}
-                </p>
+                {isViewing ? (
+                  <>
+                    <p className="text-gray-700 text-base mb-4">
+                      {recipe.description}
+                    </p>
+                    <h3 className="text-xl font-medium mb-3">Ingredients</h3>
+                    <ul className="list-disc pl-6 text-gray-700 text-base mb-4 list-inside">
+                      {recipe.ingredients && recipe.ingredients.length > 0 ? (
+                        recipe.ingredients.map((ingredient, index) => (
+                          <li key={index} className="mb-1.5">
+                            {ingredient}
+                          </li>
+                        ))
+                      ) : (
+                        <p>No ingredients available.</p>
+                      )}
+                    </ul>
 
-                <h3 className="text-xl font-medium mb-3">Ingredients</h3>
-                <ul className="list-disc pl-6 text-gray-700 text-base mb-4 list-inside">
-                  {recipe.ingredients && recipe.ingredients.length > 0 ? (
-                    recipe.ingredients.map((ingredient, index) => (
-                      <li key={index} className="mb-1.5">
-                        {ingredient}
-                      </li>
-                    ))
-                  ) : (
-                    <p>No ingredients available.</p>
-                  )}
-                </ul>
-
-                <h3 className="text-xl font-medium mb-3">Instructions</h3>
-                <p className="text-gray-700 text-base mb-5">
-                  {renderInstructions(recipe.instructions)}
-                </p>
-
-                <div className="flex justify-between">
+                    <h3 className="text-xl font-medium mb-3">Instructions</h3>
+                    <p className="text-gray-700 text-base mb-5">
+                      {renderInstructions(recipe.instructions)}
+                    </p>
+                    <button
+                      onClick={() => handleViewRecipe(recipe._id)}
+                      className="bg-orange-500 text-white px-2 py-1 rounded hover:bg-orange-600 mb-2"
+                    >
+                      Hide
+                    </button>
+                  </>
+                ) : (
                   <button
-                    onClick={() => handleEdit(recipe._id)}
-                    className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+                    onClick={() => handleViewRecipe(recipe._id)}
+                    className="bg-orange-500 text-white px-2 py-1 rounded hover:bg-orange-600 mb-2"
                   >
-                    Edit
+                    View
                   </button>
-                  <button
-                    onClick={() => handleDelete(recipe._id)}
-                    className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
-                  >
-                    Delete
-                  </button>
-                </div>
+                )}
               </div>
             </div>
           );
         })}
       </div>
+
+      {/* Pagination Controls */}
+      <div className="flex justify-center mt-8">
+        <button
+          onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+          className="mx-2 px-4 py-2 bg-orange-500 text-white rounded"
+          disabled={currentPage === 1}
+        >
+          Previous
+        </button>
+        <span className="mx-2 text-lg font-semibold">
+          Page {currentPage} of {totalPages}
+        </span>
+        <button
+          onClick={() =>
+            setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+          }
+          className="mx-2 px-4 py-2 bg-orange-500 text-white rounded"
+          disabled={currentPage === totalPages}
+        >
+          Next
+        </button>
+      </div>
     </div>
   );
 };
+
 
 export default MyRecipes;

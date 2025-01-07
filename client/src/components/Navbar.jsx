@@ -57,7 +57,6 @@ export const Navbar = () => {
             }
           );
           setUserProfile(userResponse.data);
-          // setProfilePicture(userResponse.data.profileImage || "");
         } catch (error) {
           console.error("Error fetching user profile:", error);
           if (error.response && error.response.status === 401) {
@@ -93,10 +92,7 @@ export const Navbar = () => {
           setProfilePicture(response.data.profileImage);
         }
       } catch (error) {
-        console.error(
-          "Error uploading profile picture:",
-          error.response?.data || error.message
-        );
+        console.error("Error uploading profile picture:", error);
       }
     }
   };
@@ -139,15 +135,24 @@ export const Navbar = () => {
 
   return (
     <>
+      {/* Black Bar with Yegna Mgb Text */}
       <div className="bg-black text-white w-screen absolute top-0 left-0 right-0 z-10">
-        <div className="text-center py-2 text-sm">Food Recipes.......</div>
+        <div className="text-center text-orange-400 py-6 text-2xl font-bold text-gray-200">
+            Ethiopian Food Recipes
+        </div>
       </div>
 
-      <div className="bg-white text-black shadow-md sticky top-0 z-50 border-b border-gray-200">
+      {/* White Navbar */}
+      <div className="bg-white text-black shadow-md sticky top-0 z-50 border-b border-gray-200 mt-5">
         <div className="container mx-auto flex flex-wrap items-center justify-between p-4">
           <div className="flex-shrink-0">
             <Link to="/">
-              <img src="/path-to-your-logo.png" alt="Logo" className="h-8" />
+              <span
+                className="text-3xl italic font-bold text-orange-600 "
+                
+              >
+                 Gebeta
+              </span>{" "}
             </Link>
           </div>
 
@@ -166,14 +171,14 @@ export const Navbar = () => {
             } lg:block`}
           >
             <div className="flex-grow flex items-center justify-center space-x-4">
-              <Link to="/" className="hover:text-gray-600">
+              <Link to="/" className="font-bold text-black hover:text-gray-600">
                 Home
               </Link>
 
               <div className="relative">
                 <button
                   onClick={toggleDropdown(setIsRecipesOpen)}
-                  className="flex items-center space-x-2 px-4 py-2 rounded hover:bg-gray-200"
+                  className="font-bold text-black flex items-center space-x-2 px-4 py-2 rounded hover:bg-gray-200"
                 >
                   <span>Recipes</span>
                   <FaChevronDown />
@@ -195,7 +200,7 @@ export const Navbar = () => {
                   onClick={toggleDropdown(setIsMealsOpen)}
                   onMouseEnter={() => handleMealHover("meals")}
                   onMouseLeave={() => handleMealHover(null)}
-                  className="flex items-center space-x-2 px-4 py-2 rounded hover:bg-gray-200"
+                  className="font-bold text-black flex items-center space-x-2 px-4 py-2 rounded hover:bg-gray-200"
                 >
                   <span>Meals</span>
                   <FaChevronDown />
@@ -295,7 +300,7 @@ export const Navbar = () => {
               <div className="flex items-center space-x-4">
                 <Link
                   to="/saved-recipes"
-                  className="flex items-center space-x-2 px-4 py-2 rounded hover:bg-gray-200"
+                  className="font-bold text-black flex items-center space-x-2 px-4 py-2 rounded hover:bg-gray-200"
                 >
                   <span>Saved Recipes</span>
                 </Link>
@@ -304,7 +309,7 @@ export const Navbar = () => {
 
             <Link
               to="/create-recipes"
-              className="flex items-center space-x-2 px-4 py-2 rounded hover:bg-gray-200"
+              className="font-bold text-black flex items-center space-x-2 px-4 py-2 rounded hover:bg-gray-200"
             >
               <span>+Add Recipes</span>
             </Link>
@@ -312,7 +317,7 @@ export const Navbar = () => {
             {!token ? (
               <Link
                 to="/auth"
-                className="bg-black text-white py-2 px-4 rounded hover:bg-gray-800"
+                className="bg-orange-400 text-white py-2 px-4 rounded hover:bg-orange-700"
               >
                 Login/Register
               </Link>
@@ -320,7 +325,7 @@ export const Navbar = () => {
               <>
                 <button
                   onClick={() => setIsDrawerOpen(true)}
-                  className="flex items-center space-x-2 px-4 py-2 rounded hover:bg-gray-200"
+                  className="font-bold text-black flex items-center space-x-2 px-4 py-2 rounded hover:bg-gray-200"
                 >
                   <FaUser />
                   <span>Profile</span>
@@ -424,21 +429,21 @@ export const Navbar = () => {
 
                     <Link
                       to="/create-recipes"
-                      className="flex items-center space-x-2 px-4 py-2 rounded hover:bg-gray-200"
+                      className="font-bold text-orange-500  flex items-center space-x-2 px-4 py-2 rounded hover:bg-gray-200"
                     >
                       <span>+Add Recipes</span>
                     </Link>
 
                     <Link
                       to="/my-recipes"
-                      className="flex items-center space-x-2 px-4 py-2 rounded hover:bg-gray-200"
+                      className="font-bold text-orange-500 flex items-center space-x-2 px-4 py-2 rounded hover:bg-gray-200"
                     >
                       <span>My Recipes</span>
                     </Link>
 
                     <button
                       onClick={logout}
-                      className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mb-2 mt-4"
+                      className="bg-orange-500 text-white py-2 px-4 rounded hover:bg-orange-700 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mb-2 mt-4"
                     >
                       Logout
                     </button>

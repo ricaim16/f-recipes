@@ -35,6 +35,7 @@ const EditRecipe = () => {
 
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [imagePreview, setImagePreview] = useState(null); // To show image preview
 
   useEffect(() => {
     const fetchRecipe = async () => {
@@ -110,7 +111,7 @@ const EditRecipe = () => {
           },
         }
       );
-    navigate("/my-recipes"); 
+      navigate("/my-recipes");
     } catch (error) {
       setError("Error updating recipe.");
     } finally {
@@ -120,7 +121,9 @@ const EditRecipe = () => {
 
   return (
     <div className="p-6 mx-auto">
-      <h1 className="text-4xl font-bold mb-8 text-center">Edit Recipe</h1>
+      <h1 className="text-4xl font-bold mb-8 text-center text-orange-500">
+        Edit Recipe
+      </h1>
       {error && <p className="text-red-500 text-center mb-4">{error}</p>}
 
       <form onSubmit={handleSubmit} className="max-w-lg mx-auto">
@@ -137,7 +140,7 @@ const EditRecipe = () => {
             name="name"
             value={recipe.name}
             onChange={handleChange}
-            className="w-full p-2 border border-gray-300 rounded"
+            className="w-full p-2 border border-orange-500 rounded bg-orange-100"
             required
           />
         </div>
@@ -153,7 +156,7 @@ const EditRecipe = () => {
             name="description"
             value={recipe.description}
             onChange={handleChange}
-            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+            className="mt-1 block w-full border border-orange-500 rounded-md shadow-sm p-2 bg-orange-100"
             required
           />
         </div>
@@ -171,14 +174,14 @@ const EditRecipe = () => {
               name={`ingredient-${index}`}
               value={ingredient}
               onChange={(event) => handleIngredientChange(event, index)}
-              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 mb-2"
+              className="mt-1 block w-full border border-orange-500 rounded-md shadow-sm p-2 mb-2 bg-orange-100"
               required
             />
           ))}
           <button
             type="button"
             onClick={handleAddIngredient}
-            className="bg-black text-white py-2 px-4 rounded hover:bg-blue-700"
+            className="bg-orange-400 text-white py-2 px-4 rounded hover:bg-orange-600"
           >
             Add Ingredient
           </button>
@@ -195,7 +198,7 @@ const EditRecipe = () => {
             name="instructions"
             value={recipe.instructions}
             onChange={handleChange}
-            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+            className="mt-1 block w-full border border-orange-500 rounded-md shadow-sm p-2 bg-orange-100"
             required
           />
         </div>
@@ -212,11 +215,16 @@ const EditRecipe = () => {
             name="image"
             accept=".jpg, .jpeg, .png"
             onChange={handleFileChange}
-            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+            className="mt-1 block w-full border border-orange-500 rounded-md shadow-sm p-2 bg-orange-100"
             required
           />
-
-          
+          {imagePreview && (
+            <img
+              src={imagePreview}
+              alt="Preview"
+              className="mt-2 w-full h-auto"
+            />
+          )}
         </div>
         <div>
           <label
@@ -231,7 +239,7 @@ const EditRecipe = () => {
             name="cookingTime"
             value={recipe.cookingTime}
             onChange={handleChange}
-            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+            className="mt-1 block w-full border border-orange-500 rounded-md shadow-sm p-2 bg-orange-100"
             required
             min="0"
           />
@@ -260,7 +268,7 @@ const EditRecipe = () => {
         </div>
         <button
           type="submit"
-          className="w-full bg-black text-white py-2 px-4 rounded-md shadow-sm hover:bg-blue-600"
+          className="w-full bg-orange-400 text-white py-2 px-4 rounded-md shadow-sm hover:bg-orange-600"
           disabled={loading}
         >
           {loading ? "Saving..." : "Save Changes"}

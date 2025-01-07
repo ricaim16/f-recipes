@@ -25,7 +25,7 @@ mongoose
 // Middleware
 app.use(cors());
 app.use(express.json());
-app.use('/profilePicture', express.static('profilePicture'));
+app.use("/profilePicture", express.static("profilePicture"));
 app.use('/recipePic', express.static('recipePic'));
 
 app.use("/auth", userRouter);

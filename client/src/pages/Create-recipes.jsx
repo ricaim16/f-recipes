@@ -62,7 +62,6 @@ const CreateRecipes = () => {
 
   const handleCategoryChange = (event) => {
     const { value, checked } = event.target;
-		console.log("Checkbox value:", value);
 
     setRecipe((prevRecipe) => {
       let updatedCategories = [...prevRecipe.categories];
@@ -78,43 +77,45 @@ const CreateRecipes = () => {
     });
   };
 
-const handleSubmit = async (event) => {
-  event.preventDefault();
-  setLoading(true);
-  setError(null);
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    setLoading(true);
+    setError(null);
 
-  try {
-    const formData = new FormData();
-    formData.append("name", recipe.name);
-    formData.append("description", recipe.description);
-    formData.append("ingredients", JSON.stringify(recipe.ingredients));
-    formData.append("instructions", recipe.instructions);
-    formData.append("cookingTime", recipe.cookingTime.toString()); // Ensure it's a string
-    formData.append("userOwner", recipe.userOwner); // Include userOwner
-    formData.append("createdBy", recipe.userOwner); // Include createdBy
-    formData.append("categories", JSON.stringify(recipe.categories));
-    formData.append("image", imageFile);
+    try {
+      const formData = new FormData();
+      formData.append("name", recipe.name);
+      formData.append("description", recipe.description);
+      formData.append("ingredients", JSON.stringify(recipe.ingredients));
+      formData.append("instructions", recipe.instructions);
+      formData.append("cookingTime", recipe.cookingTime.toString());
+      formData.append("userOwner", recipe.userOwner);
+      formData.append("createdBy", recipe.userOwner);
+      formData.append("categories", JSON.stringify(recipe.categories));
+      formData.append("image", imageFile);
 
-    await axios.post("http://localhost:3001/recipes", formData, {
-      headers: {
-        Authorization: `Bearer ${cookies.access_token}`,
-        "Content-Type": "multipart/form-data",
-      },
-    });
+      await axios.post("http://localhost:3001/recipes", formData, {
+        headers: {
+          Authorization: `Bearer ${cookies.access_token}`,
+          "Content-Type": "multipart/form-data",
+        },
+      });
 
-    navigate("/recipes");
-  } catch (error) {
-    console.error("Submission error:", error);
-    setError(error.response ? error.response.data.message : error.message);
-  } finally {
-    setLoading(false);
-  }
-};
+      navigate("/recipes");
+    } catch (error) {
+      console.error("Submission error:", error);
+      setError(error.response ? error.response.data.message : error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
       <div className="max-w-lg w-full p-6 bg-white shadow-md rounded-lg">
-        <h2 className="text-2xl font-bold mb-4 text-center">Create Recipe</h2>
+        <h2 className="text-2xl font-bold mb-4 text-center text-orange-600">
+          Create Recipe
+        </h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           {error && (
             <div
@@ -138,7 +139,7 @@ const handleSubmit = async (event) => {
               name="name"
               value={recipe.name}
               onChange={handleChange}
-              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+              className="mt-1 block w-full border border-orange-500 rounded-md shadow-sm p-2 bg-orange-100"
               required
             />
           </div>
@@ -154,7 +155,7 @@ const handleSubmit = async (event) => {
               name="description"
               value={recipe.description}
               onChange={handleChange}
-              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+              className="mt-1 block w-full border border-orange-500 rounded-md shadow-sm p-2 bg-orange-100"
               required
             />
           </div>
@@ -172,14 +173,14 @@ const handleSubmit = async (event) => {
                 name={`ingredient-${index}`}
                 value={ingredient}
                 onChange={(event) => handleIngredientChange(event, index)}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 mb-2"
+                className="mt-1 block w-full border border-orange-500 rounded-md shadow-sm p-2 mb-2 bg-orange-100"
                 required
               />
             ))}
             <button
               type="button"
               onClick={handleAddIngredient}
-              className="bg-black text-white py-2 px-4 rounded hover:bg-blue-700"
+              className="bg-orange-500 text-white py-2 px-4 rounded hover:bg-orange-700"
             >
               Add Ingredient
             </button>
@@ -196,7 +197,7 @@ const handleSubmit = async (event) => {
               name="instructions"
               value={recipe.instructions}
               onChange={handleChange}
-              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+              className="mt-1 block w-full border border-orange-500 rounded-md shadow-sm p-2 bg-orange-100"
               required
             />
           </div>
@@ -213,7 +214,7 @@ const handleSubmit = async (event) => {
               name="image"
               accept=".jpg, .jpeg, .png"
               onChange={handleFileChange}
-              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+              className="mt-1 block w-full border border-orange-500 rounded-md shadow-sm p-2 bg-orange-100"
               required
             />
           </div>
@@ -230,7 +231,7 @@ const handleSubmit = async (event) => {
               name="cookingTime"
               value={recipe.cookingTime}
               onChange={handleChange}
-              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+              className="mt-1 block w-full border border-orange-500 rounded-md shadow-sm p-2 bg-orange-100"
               required
               min="0"
             />
@@ -259,7 +260,7 @@ const handleSubmit = async (event) => {
           </div>
           <button
             type="submit"
-            className="w-full bg-black text-white py-2 px-4 rounded-md shadow-sm hover:bg-blue-600"
+            className="w-full bg-orange-500 text-white py-2 px-4 rounded-md shadow-sm hover:bg-orange-700"
             disabled={loading}
           >
             {loading ? "Creating..." : "Create Recipe"}

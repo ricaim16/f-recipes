@@ -1,7 +1,8 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { FaArrowRight, FaStar } from "react-icons/fa";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { useCookies } from "react-cookie"; // Import the useCookies hook
 
 const backendUrl = "http://localhost:3001"; // Define your backend URL
 
@@ -52,6 +53,7 @@ export const Home = () => {
   const carouselRef = useRef(null);
   const slideWidth = useRef(0);
   const navigate = useNavigate();
+  const [cookies] = useCookies(["access_token"]); // Use cookies to check authentication status
 
   const images = ["/images/1.webp", "/images/4.jpeg", "/images/2.jpg"];
 
@@ -116,15 +118,26 @@ export const Home = () => {
     fetchRecipes();
   }, []);
 
+  const handleViewAllRecipes = () => {
+    if (!cookies.access_token) {
+      // If not logged in, redirect to login page
+      navigate("/login");
+    } else {
+      navigate("/recipes");
+    }
+  };
+
   const renderSection = (title, recipes = [], category) => (
     <section className="mb-12">
-      <h2 className="text-3xl font-bold mb-4 text-center">{title}</h2>
+      <h2 className="text-3xl font-bold mb-4 text-left pl-4">{title}</h2>{" "}
+      {/* Align title to the left */}
       <div className="relative">
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 justify-start pl-4">
+          {" "}
+          {/* Align items to the left */}
           {(Array.isArray(recipes) ? recipes.slice(0, 4) : []).map((recipe) => (
             <RecipeCard key={recipe._id} recipe={recipe} />
           ))}
-
           {Array.isArray(recipes) && recipes.length > 4 && (
             <div
               className="bg-yellow-500 text-white flex items-center justify-center rounded-lg h-10 w-10 absolute right-0 top-0 transform translate-x-full mt-10 mr-8 cursor-pointer"
@@ -188,26 +201,36 @@ export const Home = () => {
 
         {/* Lorem Text */}
         <div className="lg:col-span-1 flex justify-center items-center">
-          <p className="text-2xl font-semibold mb-4">
-            Loremin nb,b mjnkb jkvgj fgsdgfx ngjhvk jfvjkvj jgvmv m
-            lcvbvhkljcbvcghkckcvhbn jcvgjdcfhx gkhx hfxkjbj,k fccg fhjvl jhlkv
-            ZXVNXzjk jhbsjdb hfkasjdb WKJEKQJRFELW{" "}
+          <p className="text-sm md:text-base lg:text-lg italic font-bold mb-4 ">
+            Explore the flavors of Ethiopia with dishes like Doro Wat, Kitfo,
+            and Tibs. Enjoy the spices of Berbere and Mitmita, and savor injera,
+            a tangy flatbread, with stews and lentils.
           </p>
         </div>
       </div>
+
+      <p
+        className="text-3xl text-white font-bold mb-6 text-center"
+        style={{
+          backgroundColor: "rgb(230, 138, 0)",
+          padding: "20px",
+          borderRadius: "8px",
+        }}
+      >
+        Most Popular Food in Ethiopia
+      </p>
 
       {renderSection("Dinner Recipes", dinnerRecipes, "Dinner")}
       {renderSection("Drink Recipes", drinkRecipes, "Drink")}
       {renderSection("Snack Recipes", snackRecipes, "Snacks")}
 
-
       {/* Full-width background section */}
       <div className="relative -mx-6 px-6 bg-yellow-100 py-6 mb-12">
         <div className="max-w-screen-lg mx-auto flex flex-col lg:flex-row gap-6 items-center justify-between">
           <div className="flex-1 text-center lg:text-left flex flex-col items-center lg:items-center">
-            <p className="text-2xl font-semibold mb-4">Loremin</p>
+            <p className="text-3xl font-semibold mb-4"> Add Your Recipes </p>
             <button
-              onClick={() => navigate("/recipes")}
+              onClick={handleViewAllRecipes} // Use this function to check login before viewing recipes
               className="bg-yellow-500 text-white py-2 px-4 rounded-lg flex items-center justify-end"
             >
               <span className="text-lg">View All Recipes</span>
@@ -226,7 +249,66 @@ export const Home = () => {
         </div>
       </div>
 
-      
+      {/* About Us Section */}
+      <section className="py-12">
+        <div className="max-w-screen-xl mx-auto text-center">
+          <h2
+            className="text-3xl font-bold mb-6"
+            style={{ color: "rgb(230, 138, 0)" }}
+          >
+            About Us
+          </h2>
+          <p className="text-lg mb-6 font-serif">
+            Welcome to Ethiopian Recipes! We are passionate about bringing the
+            best and most delicious Ethiopian dishes to your table. Our platform
+            offers a wide variety of recipes, ranging from classic favorites
+            like Doro Wat and Kitfo, to exciting new dishes from Ethiopia.
+            Whether you're a seasoned chef or a beginner in the kitchen, our
+            recipes are designed to make cooking fun and easy. Join us in
+            exploring the rich flavors and culture of Ethiopian cuisine!
+          </p>
+        </div>
+      </section>
+
+      {/* Contact Us Section */}
+      <section className="py-12 bg-gray-800 text-white">
+        <div className="max-w-screen-xl mx-auto text-center">
+          <h2 className="text-3xl font-bold mb-6">Contact Us</h2>
+          <p className="text-lg mb-4">
+            Feel free to get in touch with us anytime!
+          </p>
+          <p className="text-lg mb-2">
+            Phone:{" "}
+            <a href="tel:+251988765324" className="text-yellow-500">
+              +251 988 765 324
+            </a>
+          </p>
+          <p className="text-lg mb-4">
+            Or check out our social media for the latest updates and delicious
+            recipes:
+          </p>
+          <div className="flex justify-center gap-6 mb-4">
+            <a
+              href="https://www.facebook.com/EthiopianRecipes"
+              className="text-white hover:text-yellow-500"
+            >
+              Facebook
+            </a>
+            <a
+              href="https://twitter.com/EthiopianRecipes"
+              className="text-white hover:text-yellow-500"
+            >
+              Twitter
+            </a>
+            <a
+              href="https://www.instagram.com/EthiopianRecipes"
+              className="text-white hover:text-yellow-500"
+            >
+              Instagram
+            </a>
+          </div>
+        </div>
+      </section>
     </div>
   );
 };

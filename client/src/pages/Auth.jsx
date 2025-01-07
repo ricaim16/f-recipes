@@ -72,7 +72,7 @@ export const Auth = () => {
     <div className="flex flex-col lg:flex-row min-h-screen">
       {/* Description Section */}
       <div
-        className="hidden lg:flex lg:flex-1 lg:items-center lg:justify-center bg-gray-800 text-white p-4 md:p-6 lg:p-12"
+        className="hidden lg:flex lg:flex-1 lg:items-center lg:justify-center bg-orange-400 text-white p-4 md:p-6 lg:p-12"
         style={{ height: "100vh" }}
       >
         <div className="max-w-xs md:max-w-sm lg:max-w-md text-center">
@@ -93,7 +93,7 @@ export const Auth = () => {
           onSubmit={handleSubmit}
           className="w-full max-w-xs md:max-w-sm lg:max-w-md rounded-lg shadow-md p-6 md:p-8 bg-white"
         >
-          <h2 className="text-xl md:text-2xl lg:text-3xl font-bold mb-6 text-center">
+          <h2 className="text-xl md:text-2xl lg:text-3xl font-bold mb-6 text-center text-orange-400">
             {isLogin ? "Login to Your Account" : "Create a New Account"}
           </h2>
 
@@ -171,7 +171,7 @@ export const Auth = () => {
 
           <button
             type="submit"
-            className="w-full py-2 px-4 bg-gray-800 text-white font-semibold rounded-lg shadow-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+            className="w-full py-2 px-4 bg-orange-500 text-white font-semibold rounded-lg shadow-md hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
           >
             {isLogin ? "Login" : "Sign Up"}
           </button>
@@ -180,7 +180,7 @@ export const Auth = () => {
             <button
               type="button"
               onClick={() => setIsLogin(!isLogin)}
-              className="text-blue-600 hover:text-blue-800 focus:outline-none"
+              className="text-orange-600 hover:text-orange-800 focus:outline-none"
             >
               {isLogin
                 ? "Need an account? Sign up"
