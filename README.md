@@ -1,74 +1,117 @@
-# Food Recipes Project
+# Food Recipes of Ethiopia
 
-> *Welcome to my Food Recipes Project! This is my first full-stack application built using the MERN stack. Below are the instructions to set up and run the project.*
+**Food Recipes of Ethiopia** is a web application that allows users to easily post, browse, comment, and interact with a variety of Ethiopian recipes. Users can explore a wide selection of recipes across different categories, submit their own recipes, and engage with others through likes, comments, and ratings.
 
-Getting Started
-Prerequisites
-Make sure you have the following installed on your machine:
+## Features
 
+### Recipe Browsing
+- Browse recipes shared by others.
+- Filter recipes by categories such as **Dinner**, **Lunch**, **Desserts**, **Breakfast**, **Drink**, **Snacks**, **Fasting**, **Vegetable**, **Fruits**, and **Dairy & Egg**.
+- Browse by the creator or search for recipes by title.
+- Filter recipes based on preparation times and ingredients.
 
-Node.js
+### User Account Management
+- Users can sign up and create accounts to save their favorite recipes.
+- Authenticated users can create, edit, and delete their own recipes.
 
-npm (Node Package Manager)
+### Recipe Creation
+- Users can create a new recipe by adding the following:
+  - **Title**
+  - **Description**
+  - **Ingredients** (stored in a separate database table)
+  - **Instructions** (stored in a separate database table)
+  - **Cooking Time**
+  - **Category** (e.g., Dinner, Lunch, etc.)
+  - **Multiple images**, including a featured image for the thumbnail.
 
-Installation
-Clone the repository:
+### Interaction
+- Users can **like** recipes.
+- Users can **bookmark** their favorite recipes.
+- Users can **comment** on recipes.
+- Users can **rate** recipes.
 
+## Technical Stack
 
-bash
-Copy code
+- **Frontend**: React, Tailwind CSS, Vite
+- **Backend**: Node.js, Express
+- **Database**: MongoDB
+- **Authentication**: JWT (JSON Web Tokens) for secure user authentication
 
-git clone [your-repo-url]
+## Technical Requirements
 
-cd f-recipes
-Set up the client side:
+- JWT authentication system to secure user data and access.
+- Tailwind CSS for responsive and attractive styling.
+- Focus on delivering a clean and user-friendly UI/UX design.
 
+## Getting Started
 
+### Prerequisites
+- Node.js installed on your machine.
+- MongoDB set up and running.
 
-bash
-Copy code
+### Installation
 
-cd client
-npm install
-npm run dev
-After running this command, you should see:
+1. **Clone the repository** to your local machine:
+    ```bash
+    git clone https://github.com/your-username/foodrecipes-ethiopia.git
+    cd foodrecipes-ethiopia
+    ```
 
-sql
-Copy code
+2. **Setup Frontend**:
+    - Navigate to the client directory:
+      ```bash
+      cd client
+      ```
+    - Install the frontend dependencies:
+      ```bash
+      npm install
+      ```
+    - Run the frontend development server:
+      ```bash
+      npm run dev
+      ```
+    - You should see the following output:
+      ```bash
+      VITE v5.4.2  ready in 2385 ms
 
+      ➜  Local:   http://localhost:5173/
+      ➜  Network: use --host to expose
+      ➜  press h + enter to show help
+      ```
+    - Open your browser and go to `http://localhost:5173/` to view the application.
 
-VITE v5.4.2 ready in [time] ms
+3. **Setup Backend**:
+    - Navigate to the server directory:
+      ```bash
+      cd server
+      ```
+    - Install the backend dependencies:
+      ```bash
+      npm install
+      ```
+    - Run the backend development server:
+      ```bash
+      npm start
+      ```
+    - You should see the following output:
+      ```bash
+      [nodemon] 3.1.4
+      [nodemon] to restart at any time, enter `rs`
+      [nodemon] watching path(s): *.*
+      [nodemon] watching extensions: js,mjs,cjs,json
+      [nodemon] starting `node index.js`
+      Server running at http://localhost:3001
+      Successfully connected to MongoDB
+      ```
 
-➜  Local:   http://localhost:5173/
+4. The backend API will be running at `http://localhost:3001`, and the frontend will be running at `http://localhost:5173`.
 
-➜  Network: use --host to expose
-
-➜  press h + enter to show help
-
-Set up the server side:
-
-
-bash
-Copy code
-cd ../server
-
-npm install
-npm start
-You should see:
-
-
-arduino
-Copy code
-
-Server running at http://localhost:3001
-
-Successfully connected to MongoDB
-
-Running the Application
-
-After running the above commands, the frontend will be accessible at http://localhost:5173 and the backend will be running on http://localhost:3001.
-You can test the API with requests such as /getcategories, which should return the categories fetched from the database.
-
-
-Support
-This is my first full-stack project, and any feedback or support would be greatly appreciated!
+### Environment Variables
+Make sure to configure the following environment variables for local development:
+- **MONGO_URI**: MongoDB connection string (e.g., `mongodb://localhost:27017/foodrecipes`).
+- **JWT_SECRET**: A secret key for signing JWT tokens.
+  
+Example `.env` file:
+```env
+MONGO_URI=mongodb://localhost:27017/foodrecipes
+JWT_SECRET=your_jwt_secret_key
