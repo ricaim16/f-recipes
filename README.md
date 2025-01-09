@@ -1,6 +1,6 @@
-# Food Recipes of Ethiopia
+# Ethiopian Food Recipes
 
-**Food Recipes of Ethiopia** is a web application that allows users to easily post, browse, comment, and interact with a variety of Ethiopian recipes. Users can explore a wide selection of recipes across different categories, submit their own recipes, and engage with others through likes, comments, and ratings.
+**Ethiopian Food Recipes** is a web application that allows users to easily post, browse, comment, and interact with a variety of Ethiopian recipes. Users can explore a wide selection of recipes across different categories, submit their own recipes, and engage with others through likes, comments, and ratings.
 
 ## Features
 
